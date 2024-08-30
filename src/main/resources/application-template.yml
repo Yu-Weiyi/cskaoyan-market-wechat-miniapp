@@ -9,11 +9,11 @@ spring:
   main:
     allow-circular-references: true
   datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: 此处填写url
+    username: 此处填写数据库username
+    password: 此处填写数据库password
     druid:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: 此处填写url
-      username: 此处填写数据库username
-      password: 此处填写数据库password
       # Druid 数据库连接池 配置
       initial-size: 5
       min-idle: 5
@@ -40,6 +40,9 @@ spring:
         enabled: true
         url-pattern: "/*"
         exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
+  jackson:
+    date-format: yyyy-MM-dd
+    time-zone: GMT+8
 # MyBatis 配置
 mybatis:
   mapper-locations: classpath*:mapper/*.xml
