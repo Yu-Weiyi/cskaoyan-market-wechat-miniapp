@@ -23,5 +23,6 @@
     </environments>
     <!--写对应的mapper文件-->
     <mappers>
+        <package name="happy.coding.mapper"/>
     </mappers>
 </configuration>
