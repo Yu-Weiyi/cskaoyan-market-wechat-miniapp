@@ -1,6 +1,7 @@
 package happy.coding.bean.vo;
 
 
+import happy.coding.exception.BaseException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,5 +30,23 @@ public class BaseRespVo<T> {
                 .errmsg("失败")
                 .errno(400)
                 .build();
+    }
+
+    public static <V> BaseRespVo error(V errorData, String errorMsg, int errorCode) {
+        return BaseRespVo.builder()
+                .data(errorData)
+                .errmsg(errorMsg)
+                .errno(errorCode)
+                .build();
+    }
+
+    public static <V> BaseRespVo error(Exception ex) {
+
+        if (ex instanceof BaseException) {
+            BaseException baseException = (BaseException) ex;
+            return BaseRespVo.error(null, baseException.getErrmsg(), baseException.getErrno());
+        } else {
+            return BaseRespVo.error(null, ex.getMessage(), 500);
+        }
     }
 }
