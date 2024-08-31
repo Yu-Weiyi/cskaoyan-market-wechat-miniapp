@@ -9,11 +9,18 @@ spring:
   main:
     allow-circular-references: true
   datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://8.137.62.188:10002
     username: cskaoyan
     password: 2wsx#EDC
     druid:
+      filter:
+        config:
+          #开启密钥加密
+          enabled: true
+        stat:
+          enabled: true
       # Druid 数据库连接池 配置
       initial-size: 5
       min-idle: 5
@@ -27,18 +34,18 @@ spring:
       test-on-return: false
       pool-prepared-statements: true
       max-pool-prepared-statement-per-connection-size: 20
-      filters: stat,wall,log4j
+      filters: stat,wall,slf4j
       # Druid Web 监控配置
       stat-view-servlet:
         enabled: true
-        url-pattern: /druid/*
+        url-pattern: "/druid/*"
         allow: "0.0.0.0"
         login-username: cskaoyan
         login-password: 2wsx#EDC
         reset-enable: false
       web-stat-filter:
         enabled: true
-        url-pattern: "/*"
+        url-pattern: "/druid/*"
         exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
   jackson:
     date-format: yyyy-MM-dd
