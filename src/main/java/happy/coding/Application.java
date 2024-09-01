@@ -29,6 +29,6 @@ public class Application {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
-        log.info("happy.coding 项目二 程序已启动。");
+        log.info("happy.coding 项目二 SpringBoot 程序已启动。");
     }
 }

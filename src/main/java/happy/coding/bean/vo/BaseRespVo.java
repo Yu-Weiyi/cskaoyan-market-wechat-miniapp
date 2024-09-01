@@ -2,6 +2,7 @@ package happy.coding.bean.vo;
 
 
 import happy.coding.exception.BaseException;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,8 +14,27 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseRespVo<T> {
+
+    /**
+     * @name data
+     * @type T
+     * @description 数据
+     */
+    @Schema(description="数据")
     T data;
+    /**
+     * @name errmsg
+     * @type String
+     * @description 错误信息
+     */
+    @Schema(description="错误信息")
     String errmsg;
+    /**
+     * @name errno
+     * @type int
+     * @description 错误码
+     */
+    @Schema(description="错误码")
     int errno;
 
     static public <V> BaseRespVo<V> success(V successData){

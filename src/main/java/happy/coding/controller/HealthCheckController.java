@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/health-check")
-@Tag(name = "健康检查接口集", description = "用于检查服务器的多种功能的健康度。")
+@Tag(name = "健康检查接口组", description = "用于检查服务器的多种功能的健康度。")
 @ApiSupport(author = "WaYease yu_weiyi@outlook.com")
 @Slf4j
 public class HealthCheckController {
