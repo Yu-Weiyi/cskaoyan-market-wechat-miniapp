@@ -14,6 +14,7 @@ import lombok.Getter;
 @Getter
 public enum ErrorCodeConstant {
 
+    API_NOT_IMPLEMENTED(-2, "接口未实现"),
     UNKNOWN_ERROR(-1, "未知错误"),
     OK(0, "成功"),
 

@@ -5,6 +5,7 @@ import happy.coding.bean.model.MarketUserExample;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.exception.AuthException;
 import happy.coding.mapper.MarketUserMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
@@ -28,6 +29,7 @@ import java.util.Set;
  * @since 2024-09-01 19:50
  */
 @Component
+@Slf4j
 public class JwtRedisRealm extends AuthorizingRealm {
 
     @Autowired
@@ -51,6 +53,7 @@ public class JwtRedisRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthException {
 
+        log.info("doGetAuthenticationInfo");
         UsernamePasswordToken usernamePasswordToken = (UsernamePasswordToken)authenticationToken;
 
         // check params existence
