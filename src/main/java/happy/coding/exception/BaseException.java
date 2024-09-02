@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class BaseException extends Exception {
+public class BaseException extends RuntimeException {
 
     private int errno;
     private String errmsg;
