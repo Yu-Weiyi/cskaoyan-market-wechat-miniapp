@@ -42,7 +42,11 @@ public class AuthController {
     @Operation(
             summary = "登录接口", description = "用户账户登录。",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "正常返回")
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "200-6", description = "用户不存在"),
+                    @ApiResponse(responseCode = "200-8", description = "用户状态无效"),
+                    @ApiResponse(responseCode = "200-9", description = "密码不匹配")
             }
     )
     @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
@@ -60,9 +64,19 @@ public class AuthController {
         return null;
     }
 
-    // TODO 登出
+
+    @PostMapping("/logout")
+    @Operation(
+            summary = "登出接口", description = "用户账户登出。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "401", description = "认证失败"),
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
     public BaseRespVo logout() {
 
-        return null;
+        authService.logout();
+        return BaseRespVo.success(null);
     }
 }

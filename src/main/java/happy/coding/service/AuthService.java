@@ -23,4 +23,13 @@ public interface AuthService {
      * @since 2024-09-02, Mon, 19:14, CST
      */
     AuthLoginData login(String username, String password);
+
+    /**
+     * @name logout
+     * @description 登出。
+     * @return void
+     * @author WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
+     * @since 2024-09-02, Mon, 21:02, CST
+     */
+    void logout();
 }

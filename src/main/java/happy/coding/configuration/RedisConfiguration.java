@@ -30,7 +30,7 @@ public class RedisConfiguration {
         template.setValueSerializer(serializer);
         template.setHashKeySerializer(serializer);
         template.setHashValueSerializer(serializer);
-        log.info("Redis 客户端配置完成。");
+        log.info("Redis 客户端 配置完成。");
         return template;
     }
 }

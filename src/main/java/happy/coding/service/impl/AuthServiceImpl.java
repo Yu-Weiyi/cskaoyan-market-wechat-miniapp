@@ -4,6 +4,7 @@ import happy.coding.bean.model.MarketUser;
 import happy.coding.bean.model.MarketUserExample;
 import happy.coding.bean.vo.data.AuthLoginData;
 import happy.coding.constant.ErrorCodeConstant;
+import happy.coding.context.UserInfoContext;
 import happy.coding.exception.AuthException;
 import happy.coding.mapper.MarketUserMapper;
 import happy.coding.service.AuthService;
@@ -92,5 +93,20 @@ public class AuthServiceImpl implements AuthService {
         userInfo.put("nickName", marketUser.getNickname());
         userInfo.put("avatarUrl", marketUser.getAvatar());
         return new AuthLoginData(jwt, userInfo);
+    }
+
+    /**
+     * @return void
+     * @name logout
+     * @description 登出。
+     * @author WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
+     * @since 2024-09-02, Mon, 21:02, CST
+     */
+    @Override
+    public void logout() {
+
+        Integer userId = UserInfoContext.getUserId();
+        // redis delete jwt
+        redisTemplate.delete(userId.toString());
     }
 }
