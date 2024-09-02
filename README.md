@@ -11,7 +11,7 @@
   ```
   2024-09-02T19:35:24.449+08:00  INFO 18876 --- [  restartedMain] c.a.d.s.b.a.DruidDataSourceAutoConfigure : Init DruidDataSource
   ```
-  启动成功后，会看到以下log结尾：
+  启动成功后，会看到以下log结尾，且在上面几行会有赛博佛祖图案，表示项目启动成功；
   ```
   2024-09-02T19:35:51.648+08:00  INFO 18876 --- [  restartedMain] happy.coding.Application                 : happy.coding 项目二 SpringBoot 程序已启动。
   2024-09-02T19:35:51.982+08:00  INFO 18876 --- [(3)-172.25.16.1] o.a.c.c.C.[Tomcat].[localhost].[/wx]     : Initializing Spring DispatcherServlet 'dispatcherServlet'

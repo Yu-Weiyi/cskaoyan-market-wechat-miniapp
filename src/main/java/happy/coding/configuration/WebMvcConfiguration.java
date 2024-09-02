@@ -1,5 +1,6 @@
 package happy.coding.configuration;
 
+import happy.coding.interceptor.AuthLoginInterceptor;
 import happy.coding.interceptor.JwtTokenInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Autowired
     private JwtTokenInterceptor jwtTokenInterceptor;
 
+    @Autowired
+    private AuthLoginInterceptor AuthLoginInterceptor;
+
     /**
      * @name addInterceptors
      * @description 注册拦截器。
@@ -47,6 +51,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 // auth api
                 .excludePathPatterns("/auth/register/**")
                 .excludePathPatterns("/auth/login/**");
+        interceptorRegistry.addInterceptor(AuthLoginInterceptor)
+                        .addPathPatterns("/auth/login/**");
         log.info("拦截器 注册完成。");
     }
 

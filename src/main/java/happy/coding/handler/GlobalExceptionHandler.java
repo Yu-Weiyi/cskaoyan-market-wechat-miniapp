@@ -29,7 +29,6 @@ public class GlobalExceptionHandler {
      * @since 2024-08-31, Sat, 12:37, CST
      */
     @ExceptionHandler
-    @ResponseBody
     public BaseRespVo handleException(BaseException ex) {
 
         ex.printStackTrace();

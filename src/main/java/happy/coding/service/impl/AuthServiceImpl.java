@@ -83,6 +83,7 @@ public class AuthServiceImpl implements AuthService {
 
         // gen JWT
         String id = marketUser.getId().toString();
+        UserInfoContext.setUserId(Integer.valueOf(id));
         Date now = new Date();
         String jwt = jwtUtil.genToken(id, now);
 
