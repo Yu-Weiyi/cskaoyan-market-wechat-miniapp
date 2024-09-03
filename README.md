@@ -33,4 +33,18 @@
 - Druid 监控（查看SQL执行情况）
   - http://localhost:8083/wx/druid/login.html
 
-## 
+## 注意事项
+
+- 逻辑删除
+- 认证
+- 错误码
+- 分页
+- 清理threadlocal
+
+## 附加功能
+
+### 完成
+- 健康检查接口
+
+### 计划
+- API统计

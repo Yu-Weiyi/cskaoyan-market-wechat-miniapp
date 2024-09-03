@@ -48,6 +48,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .excludePathPatterns("/druid/**")// druid
                 // health check api
                 .excludePathPatterns("/health-check/**")
+                // public api
+                .excludePathPatterns("/home/index/**")
                 // auth api
                 .excludePathPatterns("/auth/register/**")
                 .excludePathPatterns("/auth/login/**");

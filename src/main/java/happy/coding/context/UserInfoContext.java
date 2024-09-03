@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  */
 public class UserInfoContext {
 
-    private static ThreadLocal<Integer> userId = new ThreadLocal<>();
+    private static ThreadLocal<Integer> userId = ThreadLocal.withInitial(() -> 0);
 
     public static void setUserId(Integer id) {
 
@@ -23,6 +23,11 @@ public class UserInfoContext {
     public static Integer getUserId() {
 
         return userId.get();
+    }
+
+    public static boolean isLogined() {
+
+        return userId.get() != null && userId.get() != 0;
     }
 
     public static void removeUserId() {

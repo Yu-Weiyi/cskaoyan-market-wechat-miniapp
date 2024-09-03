@@ -29,6 +29,7 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
+        System.out.println(request.getRequestURI());
         if (!(handler instanceof HandlerMethod)) {
             return true;
         }
