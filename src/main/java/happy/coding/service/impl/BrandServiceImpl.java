@@ -26,14 +26,14 @@ public class BrandServiceImpl implements BrandService {
     MarketBrandMapper marketBrandMapper;
 
     @Override
-    public List<MarketBrand> list(int limit) {
+    public List<MarketBrand> list(int page, int limit) {
 
         MarketBrandExample marketBrandExample = new MarketBrandExample();
         marketBrandExample.createCriteria()
                 .andDeletedEqualTo(false);
         marketBrandExample.setOrderByClause("add_time DESC");
         if (limit > 0) {
-            PageHelper.startPage(1, limit);
+            PageHelper.startPage(page, limit);
         }
         List<MarketBrand> marketBrandList = marketBrandMapper.selectByExample(marketBrandExample);
         return marketBrandList;
