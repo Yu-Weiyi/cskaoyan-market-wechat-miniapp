@@ -62,13 +62,13 @@ public class GoodsController {
             }
     )
     @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
-    public BaseRespVo list(@RequestParam Integer categoryId, @RequestParam Integer page, @RequestParam Integer limit) {
+    public BaseRespVo list(@RequestParam(required = false) Integer categoryId, @RequestParam(required = false) Integer brandId, @RequestParam Integer page, @RequestParam Integer limit) {
 
-        if (categoryId == null || categoryId < 0 || page == null || page < 0 || limit == null || limit < 0) {
+        if (page == null || page < 0 || limit == null || limit < 0) {
             throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
         }
 
-        List<MarketGoods> marketGoodsList = goodsService.listByCategoryId(categoryId, page, limit);
+        List<MarketGoods> marketGoodsList = goodsService.list(categoryId, brandId, page, limit);
         return BaseRespVo.successPage(marketGoodsList);
     }
 

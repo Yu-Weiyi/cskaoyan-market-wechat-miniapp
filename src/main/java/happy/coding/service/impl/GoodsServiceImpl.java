@@ -90,22 +90,6 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public List<MarketGoods> listByCategoryId(int categoryId, int page, int limit) {
-
-        MarketGoodsExample marketGoodsExample = new MarketGoodsExample();
-        marketGoodsExample.createCriteria()
-                .andCategoryIdEqualTo(categoryId)
-                .andIsOnSaleEqualTo(true)
-                .andDeletedEqualTo(false);
-        marketGoodsExample.setOrderByClause("add_time DESC");
-        if (page > 0 && limit > 0) {
-            PageHelper.startPage(page, limit);
-        }
-        List<MarketGoods> marketGoodList = marketGoodsMapper.selectByExample(marketGoodsExample);
-        return marketGoodList;
-    }
-
-    @Override
     public long count() {
 
         MarketGoodsExample marketGoodsExample = new MarketGoodsExample();
@@ -225,5 +209,27 @@ public class GoodsServiceImpl implements GoodsService {
         }
 
         return map;
+    }
+
+    @Override
+    public List<MarketGoods> list(Integer categoryId, Integer brandId, int page, int limit) {
+
+        MarketGoodsExample marketGoodsExample = new MarketGoodsExample();
+        MarketGoodsExample.Criteria criteria = marketGoodsExample.createCriteria();
+        criteria
+                .andIsOnSaleEqualTo(true)
+                .andDeletedEqualTo(false);
+        if (categoryId != null && categoryId > 0) {
+            criteria.andCategoryIdEqualTo(categoryId);
+        }
+        if (brandId != null && brandId > 0) {
+            criteria.andBrandIdEqualTo(brandId);
+        }
+        marketGoodsExample.setOrderByClause("add_time DESC");
+        if (page > 0 && limit > 0) {
+            PageHelper.startPage(page, limit);
+        }
+        List<MarketGoods> marketGoodList = marketGoodsMapper.selectByExample(marketGoodsExample);
+        return marketGoodList;
     }
 }

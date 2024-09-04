@@ -102,7 +102,7 @@ public class HomeServiceImpl implements HomeService {
                             .map(category -> new HomeIndexFloorGoodsListData(
                                     category.getId(),
                                     category.getName(),
-                                    goodsService.listByCategoryId(category.getId(), 1, Integer.parseInt(value1))))
+                                    goodsService.list(category.getId(), null, 1, Integer.parseInt(value1))))
                             .collect(Collectors.toList());
                     return collect;
                 }

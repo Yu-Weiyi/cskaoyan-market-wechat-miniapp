@@ -20,11 +20,11 @@ public interface GoodsService {
 
     List<MarketGoods> listHot(int limit);
 
-    List<MarketGoods> listByCategoryId(int categoryId, int page, int limit);
-
     long count();
 
     Map<String, Object> category(int categoryId);
 
     Map<String, Object> detail(int goodsId);
+
+    List<MarketGoods> list(Integer categoryId, Integer brandId, int page, int limit);
 }
