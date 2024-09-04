@@ -41,7 +41,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
         // TODO temp comment
         interceptorRegistry.addInterceptor(jwtTokenInterceptor)
-                .addPathPatterns("/user/**");
+                .addPathPatterns("/user/**")
+                .addPathPatterns("/footprint/**");
 //                // 3rd party api
 //                .excludePathPatterns("/v3/api-docs/**")// api-docs
 //                .excludePathPatterns("/swagger-ui/**")// swagger-ui

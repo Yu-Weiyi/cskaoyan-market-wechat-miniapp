@@ -29,4 +29,15 @@ public class PageVo {
                 .total((int) pageInfo.getTotal())
                 .build();
     }
+
+    public static <T> PageVo list(List<T> list, PageInfo pageInfo) {
+
+        return PageVo.builder()
+                .list(list)
+                .page(pageInfo.getPageNum())
+                .pages(pageInfo.getPages())
+                .limit(pageInfo.getPageSize())
+                .total((int) pageInfo.getTotal())
+                .build();
+    }
 }

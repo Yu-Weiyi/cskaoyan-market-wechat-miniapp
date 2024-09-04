@@ -1,6 +1,7 @@
 package happy.coding.bean.vo;
 
 
+import com.github.pagehelper.PageInfo;
 import happy.coding.exception.BaseException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -50,6 +51,11 @@ public class BaseRespVo<T> {
     public static <V extends List> BaseRespVo<PageVo> successPage(V listData) {
 
         return success(PageVo.list(listData));
+    }
+
+    public static <V extends List> BaseRespVo<PageVo> successPage(V listData, PageInfo pageInfo) {
+
+        return success(PageVo.list(listData, pageInfo));
     }
     public static <V> BaseRespVo fail(V failData) {
         return BaseRespVo.builder()
