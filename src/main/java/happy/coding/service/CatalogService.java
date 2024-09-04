@@ -14,4 +14,6 @@ import java.util.Map;
 public interface CatalogService {
 
     Map<String, Object> index();
+
+    Map<String, Object> current(Integer categoryId);
 }

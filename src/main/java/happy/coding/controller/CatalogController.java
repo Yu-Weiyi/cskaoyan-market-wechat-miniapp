@@ -3,6 +3,8 @@ package happy.coding.controller;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.vo.BaseRespVo;
+import happy.coding.constant.ErrorCodeConstant;
+import happy.coding.exception.ParamException;
 import happy.coding.service.CatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -36,7 +39,7 @@ public class CatalogController {
 
     @GetMapping("/index")
     @Operation(
-            summary = "目录总览接口", description = "查询目录信息。",
+            summary = "目录总览接口", description = "查询目录总览信息，附带当前初始目录信息。",
             responses = {
                     @ApiResponse(responseCode = "200", description = "正常返回"),
                     @ApiResponse(responseCode = "200-10", description = "查询失败")
@@ -47,5 +50,25 @@ public class CatalogController {
 
         Map<String, Object> index = catalogService.index();
         return BaseRespVo.success(index);
+    }
+
+    @GetMapping("/current")
+    @Operation(
+            summary = "当前目录接口", description = "查询当前目录信息。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "200-10", description = "查询失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo current(@RequestParam Integer id) {
+
+        if (id == null || id == 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        Map<String, Object> current = catalogService.current(id);
+        return BaseRespVo.success(current);
     }
 }

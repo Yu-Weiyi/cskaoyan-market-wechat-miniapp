@@ -2,6 +2,7 @@ package happy.coding.service.impl;
 
 import happy.coding.bean.model.MarketCategory;
 import happy.coding.constant.ErrorCodeConstant;
+import happy.coding.exception.ParamException;
 import happy.coding.exception.QueryException;
 import happy.coding.service.CatalogService;
 import happy.coding.service.CategoryService;
@@ -42,24 +43,40 @@ public class CatalogServiceImpl implements CatalogService {
         if (marketCategoryList != null && marketCategoryList.size() > 0) {
             int categoryId = marketCategoryList.get(0).getId();
 
-            ExecutorService executorService = Executors.newFixedThreadPool(10);
-
-            FutureTask<MarketCategory> currentCategoryTask = new FutureTask<>(() -> categoryService.selectById(categoryId));
-            FutureTask<List<MarketCategory>> currentSubCategoryTask = new FutureTask<>(() -> categoryService.list("L2", categoryId, 0));
-
-            executorService.submit(currentCategoryTask);
-            executorService.submit(currentSubCategoryTask);
-
-            try {
-                currentCategory = currentCategoryTask.get();
-                currentSubCategory = currentSubCategoryTask.get();
-            } catch (InterruptedException | ExecutionException e) {
-                throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
-            }
+            Map<String, Object> current = current(categoryId);
+            currentCategory = (MarketCategory) current.get("currentCategory");
+            currentSubCategory = (List<MarketCategory>) current.get("currentSubCategory");
         }
 
         Map<String, Object> map = new HashMap<>();
         map.put("categoryList", marketCategoryList);
+        map.put("currentCategory", currentCategory);
+        map.put("currentSubCategory", currentSubCategory);
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> current(Integer categoryId) {
+
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+        FutureTask<MarketCategory> currentCategoryTask = new FutureTask<>(() -> categoryService.selectById(categoryId));
+        FutureTask<List<MarketCategory>> currentSubCategoryTask = new FutureTask<>(() -> categoryService.list("L2", categoryId, 0));
+
+        executorService.submit(currentCategoryTask);
+        executorService.submit(currentSubCategoryTask);
+
+        MarketCategory currentCategory = null;
+        List<MarketCategory> currentSubCategory = null;
+
+        try {
+            currentCategory = currentCategoryTask.get();
+            currentSubCategory = currentSubCategoryTask.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+
+        Map<String, Object> map = new HashMap<>();
         map.put("currentCategory", currentCategory);
         map.put("currentSubCategory", currentSubCategory);
         return map;

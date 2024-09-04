@@ -4,6 +4,7 @@ import happy.coding.bean.model.MarketUser;
 import happy.coding.bean.model.MarketUserExample;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.exception.AuthException;
+import happy.coding.exception.ParamException;
 import happy.coding.mapper.MarketUserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.*;
@@ -60,7 +61,7 @@ public class JwtRedisRealm extends AuthorizingRealm {
         String username = usernamePasswordToken.getUsername();
         String password = new String(usernamePasswordToken.getPassword());
         if (username == null || password == null) {
-            throw new AuthException(ErrorCodeConstant.INVALID_PARAM);
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
         }
 
         // verify user existence

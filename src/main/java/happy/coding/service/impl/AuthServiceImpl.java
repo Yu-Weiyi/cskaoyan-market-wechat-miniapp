@@ -6,6 +6,7 @@ import happy.coding.bean.vo.data.AuthLoginData;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.UserInfoContext;
 import happy.coding.exception.AuthException;
+import happy.coding.exception.ParamException;
 import happy.coding.mapper.MarketUserMapper;
 import happy.coding.service.AuthService;
 import happy.coding.util.JwtUtil;
@@ -55,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthLoginData login(String username, String password) {
 
         if (username == null || password == null) {
-            throw new AuthException(ErrorCodeConstant.INVALID_PARAM);
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
         }
 
         // verify user existence
