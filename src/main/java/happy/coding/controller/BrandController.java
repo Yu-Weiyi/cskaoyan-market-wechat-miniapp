@@ -56,4 +56,23 @@ public class BrandController {
         List<MarketBrand> marketBrandList = brandService.list(page, limit);
         return BaseRespVo.successPage(marketBrandList);
     }
+
+    @GetMapping("/detail")
+    @Operation(
+            summary = "品牌详情接口", description = "查询品牌详情。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo detail(@RequestParam Integer id) {
+
+        if (id == null || id < 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        MarketBrand marketBrand = brandService.selectById(id);
+        return BaseRespVo.success(marketBrand);
+    }
 }
