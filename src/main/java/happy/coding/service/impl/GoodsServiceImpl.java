@@ -54,6 +54,8 @@ public class GoodsServiceImpl implements GoodsService {
     private SystemService systemService;
     @Autowired
     private CollectService collectService;
+    @Autowired
+    private FootprintService footprintService;
 
     @Override
     public List<MarketGoods> listNew(int limit) {
@@ -216,6 +218,12 @@ public class GoodsServiceImpl implements GoodsService {
         } catch (InterruptedException | ExecutionException e) {
             throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
         }
+
+        // add footprint
+        if (UserInfoContext.isLogined()) {
+            footprintService.insert(goodsId);
+        }
+
         return map;
     }
 }

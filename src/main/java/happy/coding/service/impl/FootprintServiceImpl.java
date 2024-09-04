@@ -14,6 +14,7 @@ import happy.coding.service.FootprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -55,5 +56,18 @@ public class FootprintServiceImpl implements FootprintService {
                 })
                 .collect(Collectors.toList());
         return list;
+    }
+
+    @Override
+    public void insert(Integer goodsId) {
+
+        MarketFootprint marketFootprint = new MarketFootprint();
+        marketFootprint.setUserId(UserInfoContext.getUserId());
+        marketFootprint.setGoodsId(goodsId);
+        Date now = new Date();
+        marketFootprint.setAddTime(now);
+        marketFootprint.setUpdateTime(now);
+        marketFootprint.setDeleted(false);
+        marketFootprintMapper.insert(marketFootprint);
     }
 }

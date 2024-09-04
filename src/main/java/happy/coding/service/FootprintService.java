@@ -17,4 +17,6 @@ import java.util.List;
 public interface FootprintService {
 
     List<FootprintListData> list(int page, int limit);
+
+    void insert(Integer goodsId);
 }
