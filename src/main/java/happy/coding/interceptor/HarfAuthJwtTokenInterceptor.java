@@ -1,6 +1,7 @@
 package happy.coding.interceptor;
 
 import happy.coding.context.UserInfoContext;
+import happy.coding.mapper.MarketUserMapper;
 import happy.coding.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,16 +16,16 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * @version 0.1
  * @project project-two
  * @package happy.coding.interceptor
- * @name JwtTokenInterceptor
- * @description JWT token interceptor.
- * @since 2024-09-02 21:05
+ * @name HarfAuthJwtTokenInterceptor
+ * @description
+ * @since 2024-09-04 22:35
  */
 @Component
 @Slf4j
-public class JwtTokenInterceptor implements HandlerInterceptor {
+public class HarfAuthJwtTokenInterceptor implements HandlerInterceptor {
 
     @Autowired
-    private JwtUtil jwtUtil;
+    JwtUtil jwtUtil;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -35,6 +36,10 @@ public class JwtTokenInterceptor implements HandlerInterceptor {
 
         try {
             String token = request.getHeader(jwtUtil.getCookieKey());
+            // pass directly if no token
+            if (token == null || token.isEmpty() || token.isBlank()) {
+                return true;
+            }
             log.debug("校验 JWT(" + token + ")");
             Integer userId = Integer.valueOf(jwtUtil.extractId(token));
             UserInfoContext.setUserId(userId);

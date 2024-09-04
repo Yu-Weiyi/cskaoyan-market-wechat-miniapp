@@ -32,7 +32,6 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    // TODO canAuth
     @GetMapping("/goodscount")
     @Operation(
             summary = "购物车数量接口", description = "查询购物车内商品数量。",

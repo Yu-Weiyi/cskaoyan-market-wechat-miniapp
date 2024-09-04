@@ -2,7 +2,8 @@ package happy.coding.configuration;
 
 import happy.coding.interceptor.AuthLoginInterceptor;
 import happy.coding.interceptor.GlobalThreadLocalContextRemoveInterceptor;
-import happy.coding.interceptor.JwtTokenInterceptor;
+import happy.coding.interceptor.FullAuthJwtTokenInterceptor;
+import happy.coding.interceptor.HarfAuthJwtTokenInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +25,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Autowired
-    private JwtTokenInterceptor jwtTokenInterceptor;
+    private FullAuthJwtTokenInterceptor fullAuthJwtTokenInterceptor;
+    @Autowired
+    private HarfAuthJwtTokenInterceptor harfAuthJwtTokenInterceptor;
     @Autowired
     private AuthLoginInterceptor AuthLoginInterceptor;
     @Autowired
@@ -45,10 +48,16 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         interceptorRegistry.addInterceptor(globalThreadLocalContextRemoveInterceptor)
                 .addPathPatterns("/**");
 
-        // TODO temp comment
-        interceptorRegistry.addInterceptor(jwtTokenInterceptor)
+        interceptorRegistry.addInterceptor(fullAuthJwtTokenInterceptor)
                 .addPathPatterns("/user/**")
                 .addPathPatterns("/footprint/**");
+
+        interceptorRegistry.addInterceptor(harfAuthJwtTokenInterceptor)
+                .addPathPatterns("/cart/goodscount/**")
+                .addPathPatterns("/goods/detail/**")
+                .addPathPatterns("/home/index/**");
+
+
 //                // 3rd party api
 //                .excludePathPatterns("/v3/api-docs/**")// api-docs
 //                .excludePathPatterns("/swagger-ui/**")// swagger-ui

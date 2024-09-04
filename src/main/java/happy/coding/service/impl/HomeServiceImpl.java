@@ -46,7 +46,7 @@ public class HomeServiceImpl implements HomeService {
     TopicService topicService;
 
     @Override
-    public Map<String, Object> index() {// TODO CanAuthInterceptor
+    public Map<String, Object> index() {
 
         Map<String, String> systemMap = systemService.mapAll();
 

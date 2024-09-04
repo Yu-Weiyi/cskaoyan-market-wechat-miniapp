@@ -36,7 +36,6 @@ public class HomeController {
     @Autowired
     HomeService homeService;
 
-    // TODO 若登录，有差异
     @GetMapping("/index")
     @Operation(
             summary = "首页信息接口", description = "展示首页信息。",

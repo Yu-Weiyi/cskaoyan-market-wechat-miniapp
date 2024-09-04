@@ -92,7 +92,6 @@ public class GoodsController {
         return BaseRespVo.success(category);
     }
 
-    // TODO canAuth
     @GetMapping("/detail")
     @Operation(
             summary = "商品详情接口", description = "查询指定商品详情。",
