@@ -59,7 +59,7 @@ public class FootprintServiceImpl implements FootprintService {
     }
 
     @Override
-    public void insert(Integer goodsId) {
+    public void insert(int goodsId) {
 
         MarketFootprint marketFootprint = new MarketFootprint();
         marketFootprint.setUserId(UserInfoContext.getUserId());
@@ -69,5 +69,14 @@ public class FootprintServiceImpl implements FootprintService {
         marketFootprint.setUpdateTime(now);
         marketFootprint.setDeleted(false);
         marketFootprintMapper.insert(marketFootprint);
+    }
+
+    @Override
+    public void delete(int footprintId) {
+
+        MarketFootprint marketFootprint = new MarketFootprint();
+        marketFootprint.setId(footprintId);
+        marketFootprint.setDeleted(true);
+        marketFootprintMapper.updateByPrimaryKeySelective(marketFootprint);
     }
 }

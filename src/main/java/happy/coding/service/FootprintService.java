@@ -18,5 +18,7 @@ public interface FootprintService {
 
     List<FootprintListData> list(int page, int limit);
 
-    void insert(Integer goodsId);
+    void insert(int goodsId);
+
+    void delete(int footprintId);
 }

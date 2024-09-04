@@ -77,6 +77,6 @@ public class AuthController {
     public BaseRespVo logout() {
 
         authService.logout();
-        return BaseRespVo.success(null);
+        return BaseRespVo.success();
     }
 }

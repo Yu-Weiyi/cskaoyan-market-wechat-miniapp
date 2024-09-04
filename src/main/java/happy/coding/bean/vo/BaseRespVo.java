@@ -40,12 +40,17 @@ public class BaseRespVo<T> {
     @Schema(description="错误码")
     int errno;
 
-    static public <V> BaseRespVo<V> success(V successData){
+    public static <V> BaseRespVo<V> success(V successData){
         return BaseRespVo.<V>builder()
                 .data(successData)
                 .errmsg("成功")
                 .errno(0)
                 .build();
+    }
+
+    public static <V> BaseRespVo<V> success() {
+
+        return success(null);
     }
 
     public static <V extends List> BaseRespVo<PageVo> successPage(V listData) {
