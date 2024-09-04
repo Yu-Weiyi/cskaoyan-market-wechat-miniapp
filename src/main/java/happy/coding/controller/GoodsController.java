@@ -2,7 +2,10 @@ package happy.coding.controller;
 
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
+import happy.coding.bean.model.MarketGoods;
 import happy.coding.bean.vo.BaseRespVo;
+import happy.coding.constant.ErrorCodeConstant;
+import happy.coding.exception.ParamException;
 import happy.coding.service.GoodsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,7 +14,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -44,5 +51,44 @@ public class GoodsController {
 
         long count = goodsService.count();
         return BaseRespVo.success(count);
+    }
+
+    @GetMapping("/list")
+    @Operation(
+            summary = "商品列表接口", description = "查询指定类别在售商品列表，分页。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo list(@RequestParam Integer categoryId, @RequestParam Integer page, @RequestParam Integer limit) {
+
+        if (categoryId == null || categoryId < 0 || page == null || page < 0 || limit == null || limit < 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        List<MarketGoods> marketGoodsList = goodsService.listByCategoryId(categoryId, page, limit);
+        return BaseRespVo.successPage(marketGoodsList);
+    }
+
+    @GetMapping("/category")
+    @Operation(
+            summary = "商品类别接口", description = "查询指定商品类别。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "200-10", description = "查询失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo category(@RequestParam Integer id) {
+
+        if (id == null || id < 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        Map<String, Object> category = goodsService.category(id);
+        return BaseRespVo.success(category);
     }
 }

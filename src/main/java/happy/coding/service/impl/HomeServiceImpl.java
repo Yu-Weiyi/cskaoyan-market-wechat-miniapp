@@ -65,7 +65,7 @@ public class HomeServiceImpl implements HomeService {
                             .map(category -> new HomeIndexFloorGoodsListData(
                                     category.getId(),
                                     category.getName(),
-                                    goodsService.listByCategoryId(category.getId(), Integer.parseInt(systemMap.get("market_wx_catlog_goods")))))
+                                    goodsService.listByCategoryId(category.getId(), 1, Integer.parseInt(systemMap.get("market_wx_catlog_goods")))))
                             .collect(Collectors.toList());
                     return collect;
                 }

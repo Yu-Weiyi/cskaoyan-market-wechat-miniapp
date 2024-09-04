@@ -3,6 +3,7 @@ package happy.coding.service;
 import happy.coding.bean.model.MarketGoods;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -19,7 +20,9 @@ public interface GoodsService {
 
     List<MarketGoods> listHot(int limit);
 
-    List<MarketGoods> listByCategoryId(int categoryId, int limit);
+    List<MarketGoods> listByCategoryId(int categoryId, int page, int limit);
 
     long count();
+
+    Map<String, Object> category(int categoryId);
 }

@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 //基本的页面返回的数据
 @Data
 @Builder
@@ -43,6 +45,11 @@ public class BaseRespVo<T> {
                 .errmsg("成功")
                 .errno(0)
                 .build();
+    }
+
+    public static <V extends List> BaseRespVo<PageVo> successPage(V listData) {
+
+        return success(PageVo.list(listData));
     }
     public static <V> BaseRespVo fail(V failData) {
         return BaseRespVo.builder()
