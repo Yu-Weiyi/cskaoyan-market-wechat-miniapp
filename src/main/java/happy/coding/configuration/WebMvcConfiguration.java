@@ -1,6 +1,7 @@
 package happy.coding.configuration;
 
 import happy.coding.interceptor.AuthLoginInterceptor;
+import happy.coding.interceptor.GlobalThreadLocalContextRemoveInterceptor;
 import happy.coding.interceptor.JwtTokenInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +25,10 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Autowired
     private JwtTokenInterceptor jwtTokenInterceptor;
-
     @Autowired
     private AuthLoginInterceptor AuthLoginInterceptor;
+    @Autowired
+    private GlobalThreadLocalContextRemoveInterceptor globalThreadLocalContextRemoveInterceptor;
 
     /**
      * @name addInterceptors
@@ -38,6 +40,10 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry interceptorRegistry) {
+
+        // globally remove thread local context to avoid memory leak
+        interceptorRegistry.addInterceptor(globalThreadLocalContextRemoveInterceptor)
+                .addPathPatterns("/**");
 
         // TODO temp comment
         interceptorRegistry.addInterceptor(jwtTokenInterceptor)
