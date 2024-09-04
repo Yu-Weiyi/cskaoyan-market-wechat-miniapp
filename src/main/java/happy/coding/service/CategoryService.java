@@ -15,7 +15,9 @@ import java.util.List;
  */
 public interface CategoryService {
 
-    List<MarketCategory> listAll();
+    List<MarketCategory> listAll(String level);
 
-    List<MarketCategory> list(int limit);
+    List<MarketCategory> list(String level, int pid, int limit);
+
+    MarketCategory selectById(int categoryId);
 }

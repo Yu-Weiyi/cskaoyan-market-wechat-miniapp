@@ -26,20 +26,26 @@ public class CategoryServiceImpl implements CategoryService {
     MarketCategoryMapper marketCategoryMapper;
 
     @Override
-    public List<MarketCategory> listAll() {
+    public List<MarketCategory> listAll(String level) {
 
         MarketCategoryExample marketCategoryExample = new MarketCategoryExample();
         marketCategoryExample.createCriteria()
+                .andLevelEqualTo(level)
                 .andDeletedEqualTo(false);
         List<MarketCategory> marketCategoryList = marketCategoryMapper.selectByExample(marketCategoryExample);
         return marketCategoryList;
     }
 
     @Override
-    public List<MarketCategory> list(int limit) {
+    public List<MarketCategory> list(String level, int pid, int limit) {
+
+        if (level == "L1") {// TODO magic value
+            pid = 0;
+        }
 
         MarketCategoryExample marketCategoryExample = new MarketCategoryExample();
         marketCategoryExample.createCriteria()
+                .andPidEqualTo(pid)
                 .andDeletedEqualTo(false);
         marketCategoryExample.setOrderByClause("add_time DESC");
         if (limit > 0) {
@@ -47,5 +53,11 @@ public class CategoryServiceImpl implements CategoryService {
         }
         List<MarketCategory> marketCategorieList = marketCategoryMapper.selectByExample(marketCategoryExample);
         return marketCategorieList;
+    }
+
+    @Override
+    public MarketCategory selectById(int categoryId) {
+
+        return marketCategoryMapper.selectByPrimaryKey(categoryId);
     }
 }

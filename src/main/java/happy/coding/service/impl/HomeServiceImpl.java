@@ -49,7 +49,7 @@ public class HomeServiceImpl implements HomeService {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
 
         FutureTask<List> bannerTask = new FutureTask<>(adService::listAll);
-        FutureTask<List> channelTask = new FutureTask<>(categoryService::listAll);
+        FutureTask<List> channelTask = new FutureTask<>(() -> categoryService.listAll("L1"));// TODO magic value
         FutureTask<List> couponListTask = new FutureTask<>(
                 UserInfoContext.isLogined() ?
                         () -> couponService.listUserAvailable(3) :
@@ -61,7 +61,7 @@ public class HomeServiceImpl implements HomeService {
         FutureTask<List> topicListTask = new FutureTask<>(() -> topicService.list(Integer.parseInt(systemMap.get("market_wx_index_topic"))));
         FutureTask<List> floorGoodsListTask = new FutureTask<>(
                 () -> {
-                    List<Object> collect = categoryService.list(Integer.parseInt(systemMap.get("market_wx_catlog_list"))).stream()
+                    List<Object> collect = categoryService.list("L1", 0, Integer.parseInt(systemMap.get("market_wx_catlog_list"))).stream()// TODO magic value
                             .map(category -> new HomeIndexFloorGoodsListData(
                                     category.getId(),
                                     category.getName(),
