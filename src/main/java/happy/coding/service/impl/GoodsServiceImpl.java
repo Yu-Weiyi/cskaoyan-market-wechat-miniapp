@@ -2,6 +2,7 @@ package happy.coding.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import happy.coding.bean.model.*;
+import happy.coding.bean.vo.data.SpecificationData;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.UserInfoContext;
 import happy.coding.exception.QueryException;
@@ -14,13 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.stream.Collectors;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -170,13 +170,18 @@ public class GoodsServiceImpl implements GoodsService {
             List<MarketGoodsProduct> marketGoodsProductList = marketGoodsProductMapper.selectByExample(marketGoodsProductExample);
             return marketGoodsProductList;
         });
-        FutureTask<List<MarketGoodsSpecification>> specificationListTask = new FutureTask<>(() -> {
+        FutureTask<List<SpecificationData>> specificationListTask = new FutureTask<>(() -> {
             MarketGoodsSpecificationExample marketGoodsSpecificationExample = new MarketGoodsSpecificationExample();
             marketGoodsSpecificationExample.createCriteria()
                     .andGoodsIdEqualTo(goodsId)
                     .andDeletedEqualTo(false);
             List<MarketGoodsSpecification> marketGoodsSpecificationList = marketGoodsSpecificationMapper.selectByExample(marketGoodsSpecificationExample);
-            return marketGoodsSpecificationList;
+            Map<String, List<MarketGoodsSpecification>> collect = marketGoodsSpecificationList.stream().collect(Collectors.groupingBy(MarketGoodsSpecification::getSpecification));
+            List<String> strings = collect.keySet().stream().collect(Collectors.toList());
+
+            List<SpecificationData> list = new ArrayList<>();
+            strings.forEach(item -> list.add(new SpecificationData(item, collect.get(item))));
+            return list;
         });
         FutureTask<Boolean> shareTask = new FutureTask<>(() -> {
             String valueStr = systemService.selectByKey("market_wx_share");
