@@ -72,4 +72,14 @@ public class GoodsServiceImpl implements GoodsService {
         List<MarketGoods> marketGoodList = marketGoodsMapper.selectByExample(marketGoodsExample);
         return marketGoodList;
     }
+
+    @Override
+    public long count() {
+
+        MarketGoodsExample marketGoodsExample = new MarketGoodsExample();
+        marketGoodsExample.createCriteria()
+                .andIsOnSaleEqualTo(true)
+                .andDeletedEqualTo(false);
+        return marketGoodsMapper.countByExample(marketGoodsExample);// TODO system cache
+    }
 }

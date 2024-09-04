@@ -20,4 +20,6 @@ public interface GoodsService {
     List<MarketGoods> listHot(int limit);
 
     List<MarketGoods> listByCategoryId(int categoryId, int limit);
+
+    long count();
 }

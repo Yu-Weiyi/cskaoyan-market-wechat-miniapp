@@ -39,20 +39,21 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry interceptorRegistry) {
 
+        // TODO temp comment
         interceptorRegistry.addInterceptor(jwtTokenInterceptor)
-                .addPathPatterns("/**")
-                // 3rd party api
-                .excludePathPatterns("/v3/api-docs/**")// api-docs
-                .excludePathPatterns("/swagger-ui/**")// swagger-ui
-                .excludePathPatterns("/doc.html")// knife4j
-                .excludePathPatterns("/druid/**")// druid
-                // health check api
-                .excludePathPatterns("/health-check/**")
-                // public api
-                .excludePathPatterns("/home/index/**")
-                // auth api
-                .excludePathPatterns("/auth/register/**")
-                .excludePathPatterns("/auth/login/**");
+                .addPathPatterns("/user/**");
+//                // 3rd party api
+//                .excludePathPatterns("/v3/api-docs/**")// api-docs
+//                .excludePathPatterns("/swagger-ui/**")// swagger-ui
+//                .excludePathPatterns("/doc.html")// knife4j
+//                .excludePathPatterns("/druid/**")// druid
+//                // health check api
+//                .excludePathPatterns("/health-check/**")
+//                // public api
+//                .excludePathPatterns("/home/index/**")
+//                // auth api
+//                .excludePathPatterns("/auth/register/**")
+//                .excludePathPatterns("/auth/login/**");
         interceptorRegistry.addInterceptor(AuthLoginInterceptor)
                         .addPathPatterns("/auth/login/**");
         log.info("拦截器 注册完成。");

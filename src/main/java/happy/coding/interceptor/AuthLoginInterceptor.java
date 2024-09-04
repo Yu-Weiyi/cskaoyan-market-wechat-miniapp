@@ -35,6 +35,7 @@ public class AuthLoginInterceptor implements HandlerInterceptor {
         Date now = new Date();
         String ip = request.getRemoteHost();
 
+        // update login time & ip
         MarketUser marketUser = new MarketUser();
         marketUser.setId(UserInfoContext.getUserId());
         marketUser.setLastLoginTime(now);
