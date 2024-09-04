@@ -17,4 +17,6 @@ import java.util.Map;
 public interface SystemService {
 
     Map<String, String> mapAll();
+
+    String selectByKey(String key);
 }

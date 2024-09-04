@@ -64,7 +64,7 @@ public class MarketFeedback implements Serializable {
     * 图片地址列表，采用JSON数组格式
     */
     @Schema(description="图片地址列表，采用JSON数组格式")
-    private String picUrls;
+    private String[] picUrls;
 
     /**
     * 创建时间

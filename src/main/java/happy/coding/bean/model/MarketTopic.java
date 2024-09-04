@@ -65,7 +65,7 @@ public class MarketTopic implements Serializable {
     * 专题相关商品，采用JSON数组格式
     */
     @Schema(description="专题相关商品，采用JSON数组格式")
-    private String goods;
+    private String[] goods;
 
     /**
     * 创建时间

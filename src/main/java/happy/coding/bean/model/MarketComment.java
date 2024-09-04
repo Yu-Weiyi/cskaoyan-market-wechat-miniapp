@@ -58,7 +58,7 @@ public class MarketComment implements Serializable {
     * 图片地址列表，采用JSON数组格式
     */
     @Schema(description="图片地址列表，采用JSON数组格式")
-    private String picUrls;
+    private String[] picUrls;
 
     /**
     * 评分， 1-5

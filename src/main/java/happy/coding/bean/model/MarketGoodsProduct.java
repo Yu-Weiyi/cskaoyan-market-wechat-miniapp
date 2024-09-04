@@ -29,7 +29,7 @@ public class MarketGoodsProduct implements Serializable {
     * 商品规格值列表，采用JSON数组格式
     */
     @Schema(description="商品规格值列表，采用JSON数组格式")
-    private String specifications;
+    private String[] specifications;
 
     /**
     * 商品货品价格

@@ -59,7 +59,7 @@ public class MarketAftersale implements Serializable {
     * 退款凭证图片链接数组
     */
     @Schema(description="退款凭证图片链接数组")
-    private String pictures;
+    private String[] pictures;
 
     /**
     * 退款说明

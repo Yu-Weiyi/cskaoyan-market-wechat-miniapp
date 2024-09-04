@@ -27,7 +27,8 @@ public enum ErrorCodeConstant {
     PASSWORD_NOT_MATCH(7, "密码不匹配"),
     INVALID_USER_STATUS(8, "用户状态无效"),
     INVALID_USER_LEVEL(9, "用户等级无效"),
-    QUERY_FAILED(10, "查询失败");
+    QUERY_FAILED(10, "查询失败"),
+    SYSTEM_GLOBAL_PARAM_ERROR(11, "系统全局参数错误");
 
 
 

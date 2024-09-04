@@ -28,7 +28,7 @@ public class MarketCategory implements Serializable {
     * 类目关键字，以JSON数组格式
     */
     @Schema(description="类目关键字，以JSON数组格式")
-    private String keywords;
+    private String[] keywords;
 
     /**
     * 类目广告语介绍

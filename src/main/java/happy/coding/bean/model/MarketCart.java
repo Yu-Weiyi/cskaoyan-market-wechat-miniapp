@@ -65,7 +65,7 @@ public class MarketCart implements Serializable {
     * 商品规格值列表，采用JSON数组格式
     */
     @Schema(description="商品规格值列表，采用JSON数组格式")
-    private String specifications;
+    private String[] specifications;
 
     /**
     * 购物车中商品是否选择状态

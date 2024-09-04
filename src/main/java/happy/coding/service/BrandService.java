@@ -16,4 +16,6 @@ import java.util.List;
 public interface BrandService {
 
     List<MarketBrand> list(int limit);
+
+    MarketBrand selectById(int id);
 }

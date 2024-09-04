@@ -2,6 +2,8 @@ package happy.coding.service.impl;
 
 import happy.coding.bean.model.MarketSystem;
 import happy.coding.bean.model.MarketSystemExample;
+import happy.coding.constant.ErrorCodeConstant;
+import happy.coding.exception.SystemException;
 import happy.coding.mapper.MarketSystemMapper;
 import happy.coding.service.SystemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,5 +39,19 @@ public class SystemServiceImpl implements SystemService {
         Map<String, String> map = new HashMap<>();
         marketSystemList.forEach(item -> map.put(item.getKeyName(), item.getKeyValue()));
         return map;
+    }
+
+    @Override
+    public String selectByKey(String key) {
+
+        MarketSystemExample marketSystemExample = new MarketSystemExample();
+        marketSystemExample.createCriteria()
+                .andKeyNameEqualTo(key)
+                .andDeletedEqualTo(false);
+        List<MarketSystem> marketSystemList = marketSystemMapper.selectByExample(marketSystemExample);
+        if (marketSystemList == null || marketSystemList.size() == 0) {
+            throw new SystemException(ErrorCodeConstant.SYSTEM_GLOBAL_PARAM_ERROR);
+        }
+        return marketSystemList.get(0).getKeyValue();
     }
 }

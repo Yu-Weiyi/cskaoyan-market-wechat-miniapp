@@ -91,4 +91,26 @@ public class GoodsController {
         Map<String, Object> category = goodsService.category(id);
         return BaseRespVo.success(category);
     }
+
+    // TODO canAuth
+    @GetMapping("/detail")
+    @Operation(
+            summary = "商品详情接口", description = "查询指定商品详情。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "200-10", description = "查询失败"),
+                    @ApiResponse(responseCode = "200-11", description = "系统全局参数错误")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo detail(@RequestParam Integer id) {
+
+        if (id == null || id < 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        Map<String, Object> detail = goodsService.detail(id);
+        return BaseRespVo.success(detail);
+    }
 }

@@ -44,7 +44,7 @@ public class MarketGoods implements Serializable {
     * 商品宣传图片列表，采用JSON数组格式
     */
     @Schema(description="商品宣传图片列表，采用JSON数组格式")
-    private String gallery;
+    private String[] gallery;
 
     /**
     * 商品关键字，采用逗号间隔

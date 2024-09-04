@@ -1,15 +1,17 @@
 package happy.coding.service.impl;
 
 import com.github.pagehelper.PageHelper;
-import happy.coding.bean.model.MarketCategory;
-import happy.coding.bean.model.MarketGoods;
-import happy.coding.bean.model.MarketGoodsExample;
+import happy.coding.bean.model.*;
 import happy.coding.constant.ErrorCodeConstant;
+import happy.coding.context.UserInfoContext;
 import happy.coding.exception.QueryException;
+import happy.coding.mapper.MarketGoodsAttributeMapper;
 import happy.coding.mapper.MarketGoodsMapper;
-import happy.coding.service.CategoryService;
-import happy.coding.service.GoodsService;
+import happy.coding.mapper.MarketGoodsProductMapper;
+import happy.coding.mapper.MarketGoodsSpecificationMapper;
+import happy.coding.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -33,9 +35,25 @@ import java.util.concurrent.FutureTask;
 public class GoodsServiceImpl implements GoodsService {
 
     @Autowired
-    MarketGoodsMapper marketGoodsMapper;
+    private MarketGoodsMapper marketGoodsMapper;
     @Autowired
-    CategoryService categoryService;
+    private CategoryService categoryService;
+    @Autowired
+    private MarketGoodsAttributeMapper marketGoodsAttributeMapper;
+    @Autowired
+    private BrandService brandService;
+    @Autowired
+    private CommentService commentService;
+    @Autowired
+    private IssueService issueService;
+    @Autowired
+    private MarketGoodsProductMapper marketGoodsProductMapper;
+    @Autowired
+    private MarketGoodsSpecificationMapper marketGoodsSpecificationMapper;
+    @Autowired
+    private SystemService systemService;
+    @Autowired
+    private CollectService collectService;
 
     @Override
     public List<MarketGoods> listNew(int limit) {
@@ -115,6 +133,82 @@ public class GoodsServiceImpl implements GoodsService {
             map.put("brotherCategory", brotherCategoryTask.get());
             map.put("parentCategory", parentCategoryTask.get());
         } catch (ExecutionException | InterruptedException e) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+        return map;
+    }
+
+    @Override
+    public Map<String, Object> detail(int goodsId) {
+
+        MarketGoods marketGoods = marketGoodsMapper.selectByPrimaryKey(goodsId);
+
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+        FutureTask<List<MarketGoodsAttribute>> attributeTask = new FutureTask<>(() -> {
+            MarketGoodsAttributeExample marketGoodsAttributeExample = new MarketGoodsAttributeExample();
+            marketGoodsAttributeExample.createCriteria()
+                    .andGoodsIdEqualTo(goodsId)
+                    .andDeletedEqualTo(false);
+            List<MarketGoodsAttribute> marketGoodsAttributeList = marketGoodsAttributeMapper.selectByExample(marketGoodsAttributeExample);
+            return marketGoodsAttributeList;
+        });
+        FutureTask<MarketBrand> brandTask = new FutureTask<>(() -> brandService.selectById(marketGoods.getBrandId()));
+        FutureTask<Map<String, Object>> commentTask = new FutureTask<>(() -> {
+            List<MarketComment> marketCommentList = commentService.listByGoodsId(goodsId);
+            Map<String, Object> map = new HashMap<>();
+            map.put("data", marketCommentList);
+            map.put("count", marketCommentList.size());
+            return map;
+        });
+        FutureTask<List<MarketIssue>> issueTask = new FutureTask<>(issueService::listAll);
+        FutureTask<List<MarketGoodsProduct>> productsListTask = new FutureTask<>(() -> {
+            MarketGoodsProductExample marketGoodsProductExample = new MarketGoodsProductExample();
+            marketGoodsProductExample.createCriteria()
+                    .andGoodsIdEqualTo(goodsId)
+                    .andDeletedEqualTo(false);
+            List<MarketGoodsProduct> marketGoodsProductList = marketGoodsProductMapper.selectByExample(marketGoodsProductExample);
+            return marketGoodsProductList;
+        });
+        FutureTask<List<MarketGoodsSpecification>> specificationListTask = new FutureTask<>(() -> {
+            MarketGoodsSpecificationExample marketGoodsSpecificationExample = new MarketGoodsSpecificationExample();
+            marketGoodsSpecificationExample.createCriteria()
+                    .andGoodsIdEqualTo(goodsId)
+                    .andDeletedEqualTo(false);
+            List<MarketGoodsSpecification> marketGoodsSpecificationList = marketGoodsSpecificationMapper.selectByExample(marketGoodsSpecificationExample);
+            return marketGoodsSpecificationList;
+        });
+        FutureTask<Boolean> shareTask = new FutureTask<>(() -> {
+            String valueStr = systemService.selectByKey("market_wx_share");
+            return Boolean.valueOf(valueStr);
+        });
+        String shareImage = marketGoods.getShareUrl();
+        int userHasCollect = 0;
+        if (UserInfoContext.isLogined()) {
+            userHasCollect = collectService.hasCollectedGoods(goodsId) ? 1 : 0;
+        }
+
+        executorService.submit(attributeTask);
+        executorService.submit(brandTask);
+        executorService.submit(commentTask);
+        executorService.submit(issueTask);
+        executorService.submit(productsListTask);
+        executorService.submit(specificationListTask);
+        executorService.submit(shareTask);
+
+        Map<String, Object> map = new HashMap<>();
+        try {
+            map.put("attribute", attributeTask.get());
+            map.put("brand", brandTask.get());
+            map.put("comment", commentTask.get());
+            map.put("issue", issueTask.get());
+            map.put("productList", productsListTask.get());
+            map.put("shareImage", shareImage);
+            map.put("share", shareTask.get());
+            map.put("specificationList", specificationListTask.get());
+            map.put("userHasCollect", userHasCollect);
+            map.put("info", marketGoods);
+        } catch (InterruptedException | ExecutionException e) {
             throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
         }
         return map;

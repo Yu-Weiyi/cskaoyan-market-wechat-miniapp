@@ -38,4 +38,11 @@ public class BrandServiceImpl implements BrandService {
         List<MarketBrand> marketBrandList = marketBrandMapper.selectByExample(marketBrandExample);
         return marketBrandList;
     }
+
+    @Override
+    public MarketBrand selectById(int brandId) {
+
+        MarketBrand marketBrand = marketBrandMapper.selectByPrimaryKey(brandId);
+        return marketBrand;
+    }
 }

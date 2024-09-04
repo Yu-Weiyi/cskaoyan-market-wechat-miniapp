@@ -1,9 +1,13 @@
 package happy.coding.service.impl;
 
+import happy.coding.bean.model.MarketBrand;
+import happy.coding.bean.model.MarketGoods;
+import happy.coding.bean.model.MarketTopic;
 import happy.coding.bean.vo.data.HomeIndexFloorGoodsListData;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.UserInfoContext;
 import happy.coding.exception.QueryException;
+import happy.coding.exception.SystemException;
 import happy.coding.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,17 +59,50 @@ public class HomeServiceImpl implements HomeService {
                         () -> couponService.listUserAvailable(3) :
                         () -> couponService.list(1, 3)
         );
-        FutureTask<List> newGoodsListTask = new FutureTask<>(() -> goodsService.listHot(Integer.parseInt(systemMap.get("market_wx_index_hot"))));
-        FutureTask<List> hotGoodsListTask = new FutureTask<>(() -> goodsService.listNew(Integer.parseInt(systemMap.get("market_wx_index_new"))));
-        FutureTask<List> brandListTask = new FutureTask<>(() -> brandService.list(Integer.parseInt(systemMap.get("market_wx_index_brand"))));
-        FutureTask<List> topicListTask = new FutureTask<>(() -> topicService.list(Integer.parseInt(systemMap.get("market_wx_index_topic"))));
+        FutureTask<List> newGoodsListTask = new FutureTask<>(() -> {
+            String value = systemMap.get("market_wx_index_hot");
+            if (value == null) {
+                throw new SystemException(ErrorCodeConstant.SYSTEM_GLOBAL_PARAM_ERROR);
+            }
+            List<MarketGoods> marketGoodsList = goodsService.listHot(Integer.parseInt(value));
+            return marketGoodsList;
+        });
+        FutureTask<List> hotGoodsListTask = new FutureTask<>(() -> {
+            String value = systemMap.get("market_wx_index_new");
+            if (value == null) {
+                throw new SystemException(ErrorCodeConstant.SYSTEM_GLOBAL_PARAM_ERROR);
+            }
+            List<MarketGoods> marketGoodsList = goodsService.listNew(Integer.parseInt(value));
+            return marketGoodsList;
+        });
+        FutureTask<List> brandListTask = new FutureTask<>(() -> {
+            String value = systemMap.get("market_wx_index_brand");
+            if (value == null) {
+                throw new SystemException(ErrorCodeConstant.SYSTEM_GLOBAL_PARAM_ERROR);
+            }
+            List<MarketBrand> marketBrandList = brandService.list(Integer.parseInt(value));
+            return marketBrandList;
+        });
+        FutureTask<List> topicListTask = new FutureTask<>(() -> {
+            String value = systemMap.get("market_wx_index_topic");
+            if (value == null) {
+                throw new SystemException(ErrorCodeConstant.SYSTEM_GLOBAL_PARAM_ERROR);
+            }
+            List<MarketTopic> marketTopicList = topicService.list(Integer.parseInt(value));
+            return marketTopicList;
+        });
         FutureTask<List> floorGoodsListTask = new FutureTask<>(
                 () -> {
-                    List<Object> collect = categoryService.list("L1", 0, Integer.parseInt(systemMap.get("market_wx_catlog_list"))).stream()// TODO magic value
+                    String value0 = systemMap.get("market_wx_catlog_list");
+                    String value1 = systemMap.get("market_wx_catlog_goods");
+                    if (value0 == null || value1 == null) {
+                        throw new SystemException(ErrorCodeConstant.SYSTEM_GLOBAL_PARAM_ERROR);
+                    }
+                    List<Object> collect = categoryService.list("L1", 0, Integer.parseInt(value0)).stream()// TODO magic value
                             .map(category -> new HomeIndexFloorGoodsListData(
                                     category.getId(),
                                     category.getName(),
-                                    goodsService.listByCategoryId(category.getId(), 1, Integer.parseInt(systemMap.get("market_wx_catlog_goods")))))
+                                    goodsService.listByCategoryId(category.getId(), 1, Integer.parseInt(value1))))
                             .collect(Collectors.toList());
                     return collect;
                 }

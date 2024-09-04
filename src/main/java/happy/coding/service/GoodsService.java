@@ -25,4 +25,6 @@ public interface GoodsService {
     long count();
 
     Map<String, Object> category(int categoryId);
+
+    Map<String, Object> detail(int goodsId);
 }

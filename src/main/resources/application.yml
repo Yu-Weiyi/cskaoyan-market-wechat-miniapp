@@ -71,6 +71,7 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: false
+  type-handlers-package: happy.coding.typehandler
 # PageHelper 配置
 pagehelper:
   helper-dialect: mysql
