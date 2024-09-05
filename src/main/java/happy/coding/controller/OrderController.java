@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -57,5 +58,25 @@ public class OrderController {
 
         List<OrderListData> list = orderService.list(showType, page, limit);
         return BaseRespVo.successPage(list, PageInfoContext.getPageInfo());
+    }
+
+    @GetMapping("/detail")
+    @Operation(
+            summary = "订单详情接口", description = "查询用户订单详情。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo detail(@RequestParam Integer orderId) {
+
+        if (orderId == null || orderId < 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        Map<String, Object> detail = orderService.detail(orderId);
+        return BaseRespVo.success(detail);
     }
 }

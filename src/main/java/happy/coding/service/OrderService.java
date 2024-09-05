@@ -3,6 +3,7 @@ package happy.coding.service;
 import happy.coding.bean.vo.data.OrderListData;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -26,4 +27,6 @@ public interface OrderService {
     long countUnComment();
 
     List<OrderListData> list(int showType, int page, int limit);
+
+    Map<String ,Object> detail(Integer orderId);
 }

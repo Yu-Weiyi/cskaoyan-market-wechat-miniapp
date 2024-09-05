@@ -7,6 +7,7 @@ import happy.coding.bean.model.MarketOrderExample;
 import happy.coding.bean.model.MarketOrderGoods;
 import happy.coding.bean.model.MarketOrderGoodsExample;
 import happy.coding.bean.vo.data.HandleOptionData;
+import happy.coding.bean.vo.data.OrderDetailData;
 import happy.coding.bean.vo.data.OrderListData;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.constant.OrderStatusConstant;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -126,5 +128,46 @@ public class OrderServiceImpl implements OrderService {
             list.add(orderListData);
         }
         return list;
+    }
+
+    @Override
+    public Map<String, Object> detail(Integer orderId) {
+
+        MarketOrder marketOrder = marketOrderMapper.selectByPrimaryKey(orderId);
+
+        List<MarketOrderGoods> orderGoods = listGoodsByOrderId(orderId);
+
+        OrderDetailData orderInfo = new OrderDetailData();
+        orderInfo.setId(orderId);
+        orderInfo.setOrderSn(marketOrder.getOrderSn());
+        orderInfo.setMessage(marketOrder.getMessage());
+        orderInfo.setMobile(marketOrder.getMobile());
+        orderInfo.setAddTime(marketOrder.getAddTime());
+        orderInfo.setAddress(marketOrder.getAddress());
+        orderInfo.setConsignee(marketOrder.getConsignee());
+        orderInfo.setActualPrice(marketOrder.getActualPrice());
+        orderInfo.setCouponPrice(marketOrder.getCouponPrice());
+        orderInfo.setFreightPrice(marketOrder.getFreightPrice());
+        orderInfo.setGoodsPrice(marketOrder.getGoodsPrice());
+        orderInfo.setAftersaleStatus(marketOrder.getAftersaleStatus());
+
+        for (OrderStatusConstant constant : OrderStatusConstant.values()) {
+            if (constant.getOrderStatus() == marketOrder.getOrderStatus()) {
+                orderInfo.setOrderStatusText(constant.getOrderStatusText());
+                orderInfo.setHandleOption(constant.getHandleOption());
+                break;
+            }
+        }
+
+        return Map.of("orderInfo", orderInfo, "orderGoods", orderGoods);
+    }
+
+    private List<MarketOrderGoods> listGoodsByOrderId(Integer orderId) {
+
+        MarketOrderGoodsExample marketOrderGoodsExample = new MarketOrderGoodsExample();
+        marketOrderGoodsExample.createCriteria()
+                .andOrderIdEqualTo(orderId)
+                .andDeletedEqualTo(false);
+        return marketOrderGoodsMapper.selectByExample(marketOrderGoodsExample);
     }
 }
