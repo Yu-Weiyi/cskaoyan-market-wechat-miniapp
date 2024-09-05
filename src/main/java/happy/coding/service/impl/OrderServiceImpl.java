@@ -14,6 +14,7 @@ import happy.coding.constant.OrderStatusConstant;
 import happy.coding.context.PageInfoContext;
 import happy.coding.context.UserInfoContext;
 import happy.coding.exception.QueryException;
+import happy.coding.exception.StatusException;
 import happy.coding.mapper.MarketOrderGoodsMapper;
 import happy.coding.mapper.MarketOrderMapper;
 import happy.coding.service.GroupService;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -88,9 +90,33 @@ public class OrderServiceImpl implements OrderService {
         int userId = UserInfoContext.getUserId();
 
         MarketOrderExample marketOrderExample = new MarketOrderExample();
-        marketOrderExample.createCriteria()
+        MarketOrderExample.Criteria criteria = marketOrderExample.createCriteria();
+        criteria
                 .andUserIdEqualTo(userId)
                 .andDeletedEqualTo(false);
+
+        switch (showType) {
+            case 0:
+                break;
+            case 1:
+                criteria.andOrderStatusEqualTo(OrderStatusConstant.UNPAID.getOrderStatus());
+                break;
+            case 2:
+                criteria.andOrderStatusEqualTo(OrderStatusConstant.PAID.getOrderStatus());
+                break;
+            case 3:
+                criteria.andOrderStatusEqualTo(OrderStatusConstant.SHIPPED.getOrderStatus());
+                break;
+            case 4:
+                criteria.andOrderStatusIn(List.of(
+                        (short) OrderStatusConstant.USER_RECEIVED.getOrderStatus(),
+                        (short) OrderStatusConstant.SYSTEM_RECEIVED.getOrderStatus()
+                ));
+                break;
+            default:
+                throw new StatusException(ErrorCodeConstant.ORDER_STATUS_ERROR);
+        }
+
         marketOrderExample.setOrderByClause("add_time DESC");
         if (page > 0 && limit > 0) {
             PageHelper.startPage(page, limit);
@@ -160,6 +186,43 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return Map.of("orderInfo", orderInfo, "orderGoods", orderGoods);
+    }
+
+    @Override
+    public void cancel(Integer orderId) {
+
+        update(orderId, List.of(OrderStatusConstant.UNPAID), OrderStatusConstant.USER_CANCELLED);
+    }
+
+    @Override
+    public void refund(Integer orderId) {
+
+        update(orderId, List.of(OrderStatusConstant.PAID), OrderStatusConstant.APPLY_REFUND);
+    }
+
+    @Override
+    public void confirm(Integer orderId) {
+
+        update(orderId, List.of(OrderStatusConstant.SHIPPED), OrderStatusConstant.USER_RECEIVED);
+    }
+
+    private void update(Integer orderId, List<OrderStatusConstant> conditionalStatusList, OrderStatusConstant newStatus) {
+
+        MarketOrder marketOrder = marketOrderMapper.selectByPrimaryKey(orderId);
+
+        if (!conditionalStatusList.stream().map(item -> item.getOrderStatus()).toList().contains(marketOrder.getOrderStatus())) {
+            throw new StatusException(ErrorCodeConstant.ORDER_STATUS_ERROR);
+        }
+
+        if (!marketOrder.getUserId().equals(UserInfoContext.getUserId())) {
+            throw new StatusException(ErrorCodeConstant.ORDER_STATUS_ERROR);
+        }
+
+        MarketOrder update = new MarketOrder();
+        update.setId(orderId);
+        update.setOrderStatus(newStatus.getOrderStatus());
+        update.setUpdateTime(new Date());
+        marketOrderMapper.updateByPrimaryKeySelective(update);
     }
 
     private List<MarketOrderGoods> listGoodsByOrderId(Integer orderId) {

@@ -13,11 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -52,7 +50,7 @@ public class OrderController {
     @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
     public BaseRespVo list(@RequestParam Byte showType, @RequestParam Integer page, @RequestParam Integer limit) {
 
-        if (showType == null || showType != 0 && showType != 1 ||page == null || page < 0 || limit == null || limit < 0) {
+        if (showType == null || !List.of((byte)0, (byte)1, (byte)2, (byte)3, (byte)4).contains(showType) || page == null || page < 0 || limit == null || limit < 0) {
             throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
         }
 
@@ -78,5 +76,65 @@ public class OrderController {
 
         Map<String, Object> detail = orderService.detail(orderId);
         return BaseRespVo.success(detail);
+    }
+
+    @PostMapping("/cancel")
+    @Operation(
+            summary = "订单取消接口", description = "取消用户订单。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo cancel(@RequestBody Map<String, Integer> mapParam) {
+
+        if (mapParam == null || mapParam.get("orderId") == null || mapParam.get("orderId") < 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        orderService.cancel(mapParam.get("orderId"));
+        return BaseRespVo.success();
+    }
+
+    @PostMapping("/refund")
+    @Operation(
+            summary = "订单退款接口", description = "退款用户订单。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo refund(@RequestBody Map<String, Integer> mapParam) {
+
+        if (mapParam == null || mapParam.get("orderId") == null || mapParam.get("orderId") < 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        orderService.refund(mapParam.get("orderId"));
+        return BaseRespVo.success();
+    }
+
+    @PostMapping("/confirm")
+    @Operation(
+            summary = "订单确认收货接口", description = "用户确认订单收货。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo confirm(@RequestBody Map<String, Integer> mapParam) {
+
+        if (mapParam == null || mapParam.get("orderId") == null || mapParam.get("orderId") < 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        orderService.confirm(mapParam.get("orderId"));
+        return BaseRespVo.success();
     }
 }

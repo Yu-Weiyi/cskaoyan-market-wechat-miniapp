@@ -29,4 +29,10 @@ public interface OrderService {
     List<OrderListData> list(int showType, int page, int limit);
 
     Map<String ,Object> detail(Integer orderId);
+
+    void cancel(Integer orderId);
+
+    void refund(Integer orderId);
+
+    void confirm(Integer orderId);
 }

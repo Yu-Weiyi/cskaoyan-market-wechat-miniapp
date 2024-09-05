@@ -30,9 +30,8 @@ public enum ErrorCodeConstant {
     INVALID_USER_STATUS(8, "用户状态无效"),
     INVALID_USER_LEVEL(9, "用户等级无效"),
     QUERY_FAILED(10, "查询失败"),
-    SYSTEM_GLOBAL_PARAM_ERROR(11, "系统全局参数错误");
-
-
+    SYSTEM_GLOBAL_PARAM_ERROR(11, "系统全局参数错误"),
+    ORDER_STATUS_ERROR(12, "订单状态错误");
 
     private final int errno;
     private final String errmsg;
