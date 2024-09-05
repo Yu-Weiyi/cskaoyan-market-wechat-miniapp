@@ -72,4 +72,19 @@ public class AddressServiceImpl implements AddressService {
         marketAddressMapper.insertSelective(marketAddress);
         return marketAddress.getId();
     }
+
+    @Override
+    public MarketAddress detail(Integer addressId) {
+
+        MarketAddressExample marketAddressExample = new MarketAddressExample();
+        marketAddressExample.createCriteria()
+                .andIdEqualTo(addressId)
+                .andUserIdEqualTo(UserInfoContext.getUserId())
+                .andDeletedEqualTo(false);
+        List<MarketAddress> marketAddressList = marketAddressMapper.selectByExample(marketAddressExample);
+        if (marketAddressList == null || marketAddressList.isEmpty()) {
+            return null;
+        }
+        return marketAddressList.get(0);
+    }
 }

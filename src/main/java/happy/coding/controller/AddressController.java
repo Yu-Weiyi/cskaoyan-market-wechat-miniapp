@@ -79,4 +79,24 @@ public class AddressController {
         int newAddressId = addressService.save(addressSaveParam);
         return BaseRespVo.success(newAddressId);
     }
+
+    @GetMapping("/detail")
+    @Operation(
+            summary = "收货地址详情接口", description = "查询用户收货地址详情。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo detail(@RequestParam Integer id) {
+
+        if (id == null || id <= 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        MarketAddress detail = addressService.detail(id);
+        return BaseRespVo.success(detail);
+    }
 }

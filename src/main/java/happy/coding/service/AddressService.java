@@ -19,4 +19,6 @@ public interface AddressService {
     List<MarketAddress> list();
 
     int save(AddressSaveParam addressSaveParam);
+
+    MarketAddress detail(Integer addressId);
 }
