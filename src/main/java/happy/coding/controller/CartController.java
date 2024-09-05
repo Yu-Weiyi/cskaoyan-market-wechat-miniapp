@@ -4,6 +4,7 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.vo.BaseRespVo;
 import happy.coding.bean.vo.param.CartAddParam;
+import happy.coding.bean.vo.param.CartCheckedParam;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.exception.ParamException;
 import happy.coding.service.CartService;
@@ -55,6 +56,7 @@ public class CartController {
             summary = "购物车总览接口", description = "查询购物车总览信息。",
             responses = {
                     @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
                     @ApiResponse(responseCode = "401", description = "认证失败")
             }
     )
@@ -70,6 +72,7 @@ public class CartController {
             summary = "购物车添加接口", description = "添加商品到用户购物车。",
             responses = {
                     @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
                     @ApiResponse(responseCode = "401", description = "认证失败")
             }
     )
@@ -86,4 +89,23 @@ public class CartController {
         return BaseRespVo.success(goodscount);
     }
 
+    @PostMapping("/checked")
+    @Operation(
+            summary = "购物车勾选接口", description = "勾选用户购物车中的商品。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo checked(@RequestBody CartCheckedParam cartCheckedParam) {
+
+        if (cartCheckedParam.getProductIds() == null || cartCheckedParam.getProductIds().isEmpty() || cartCheckedParam.getIsChecked() == null) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        Map<String, Object> index = cartService.checked(cartCheckedParam);
+        return BaseRespVo.success(index);
+    }
 }

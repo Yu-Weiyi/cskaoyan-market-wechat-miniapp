@@ -1,6 +1,7 @@
 package happy.coding.service;
 
 import happy.coding.bean.vo.param.CartAddParam;
+import happy.coding.bean.vo.param.CartCheckedParam;
 
 import java.util.Map;
 
@@ -20,4 +21,6 @@ public interface CartService {
     Map<String, Object> index();
 
     long add(CartAddParam cartAddParam);
+
+    Map<String, Object> checked(CartCheckedParam cartCheckedParam);
 }

@@ -2,6 +2,7 @@ package happy.coding.service.impl;
 
 import happy.coding.bean.model.*;
 import happy.coding.bean.vo.param.CartAddParam;
+import happy.coding.bean.vo.param.CartCheckedParam;
 import happy.coding.context.UserInfoContext;
 import happy.coding.mapper.MarketCartMapper;
 import happy.coding.mapper.MarketGoodsMapper;
@@ -103,6 +104,29 @@ public class CartServiceImpl implements CartService {
 
         long goodscount = goodscount();
         return goodscount;
+    }
+
+    @Override
+    public Map<String, Object> checked(CartCheckedParam cartCheckedParam) {
+
+        MarketCartExample marketCartExample = new MarketCartExample();
+        marketCartExample.createCriteria()
+                .andUserIdEqualTo(UserInfoContext.getUserId())
+                .andProductIdIn(cartCheckedParam.getProductIds())
+                .andDeletedEqualTo(false);
+        MarketCart marketCart = new MarketCart();
+//        switch (cartCheckedParam.getChecked()) {
+//            case 0:
+//                marketCart.setChecked(false);
+//                break;
+//            case 1:
+//                marketCart.setChecked(true);
+//        }
+        marketCart.setChecked(cartCheckedParam.getIsChecked());
+        marketCart.setUpdateTime(new Date());
+        marketCartMapper.updateByExampleSelective(marketCart, marketCartExample);
+
+        return index();
     }
 
     private List<MarketCart> listAll() {
