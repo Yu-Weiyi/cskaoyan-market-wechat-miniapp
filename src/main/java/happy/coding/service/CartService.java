@@ -1,5 +1,7 @@
 package happy.coding.service;
 
+import happy.coding.bean.vo.param.CartAddParam;
+
 import java.util.Map;
 
 /**
@@ -16,4 +18,6 @@ public interface CartService {
     long goodscount();
 
     Map<String, Object> index();
+
+    long add(CartAddParam cartAddParam);
 }

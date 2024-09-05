@@ -1,19 +1,22 @@
 package happy.coding.service.impl;
 
-import happy.coding.bean.model.MarketCart;
-import happy.coding.bean.model.MarketCartExample;
+import happy.coding.bean.model.*;
+import happy.coding.bean.vo.param.CartAddParam;
 import happy.coding.context.UserInfoContext;
 import happy.coding.mapper.MarketCartMapper;
+import happy.coding.mapper.MarketGoodsMapper;
+import happy.coding.mapper.MarketGoodsProductMapper;
 import happy.coding.service.CartService;
+import happy.coding.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -29,6 +32,12 @@ public class CartServiceImpl implements CartService {
 
     @Autowired
     private MarketCartMapper marketCartMapper;
+    @Autowired
+    private MarketGoodsMapper marketGoodsMapper;
+    @Autowired
+    private MarketGoodsProductMapper marketGoodsProductMapper;
+    @Autowired
+    private GoodsService goodsService;
 
     @Override
     public long goodscount() {
@@ -39,7 +48,8 @@ public class CartServiceImpl implements CartService {
             marketCartExample.createCriteria()
                     .andUserIdEqualTo(UserInfoContext.getUserId())
                     .andDeletedEqualTo(false);
-            count = marketCartMapper.countByExample(marketCartExample);
+            List<MarketCart> marketCartList = marketCartMapper.selectByExample(marketCartExample);
+            count = marketCartList.stream().map(item -> item.getNumber().longValue()).reduce(Long::sum).get();
         }
         return count;
     }
@@ -60,6 +70,39 @@ public class CartServiceImpl implements CartService {
         index.put("cartList", cartList);
         index.put("cartTotal", cartTotal);
         return index;
+    }
+
+    @Override
+    public long add(CartAddParam cartAddParam) {
+
+        Integer userId = UserInfoContext.getUserId();
+
+        MarketGoods goods = marketGoodsMapper.selectByPrimaryKey(cartAddParam.getGoodsId());
+        MarketGoodsProduct product = marketGoodsProductMapper.selectByPrimaryKey(cartAddParam.getProductId());
+        List<MarketGoodsSpecification> specificationList = goodsService.selectSpecificationByGoodsId(cartAddParam.getGoodsId());
+        Date now = new Date();
+
+        MarketCart marketCart = new MarketCart();
+        marketCart.setUserId(userId);
+        marketCart.setGoodsId(cartAddParam.getGoodsId());
+        marketCart.setGoodsSn(goods.getGoodsSn());
+        marketCart.setGoodsName(goods.getName());
+        marketCart.setProductId(cartAddParam.getProductId());
+        marketCart.setPrice(product.getPrice());
+        marketCart.setNumber(cartAddParam.getNumber());
+        marketCart.setSpecifications(specificationList.stream()
+                .map(item -> item.getSpecification())
+                .toArray(String[]::new)
+        );
+        marketCart.setChecked(true);
+        marketCart.setPicUrl(product.getUrl());
+        marketCart.setAddTime(now);
+        marketCart.setUpdateTime(now);
+        marketCart.setDeleted(false);
+        marketCartMapper.insertSelective(marketCart);
+
+        long goodscount = goodscount();
+        return goodscount;
     }
 
     private List<MarketCart> listAll() {

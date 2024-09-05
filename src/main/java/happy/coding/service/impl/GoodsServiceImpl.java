@@ -232,4 +232,15 @@ public class GoodsServiceImpl implements GoodsService {
         List<MarketGoods> marketGoodList = marketGoodsMapper.selectByExample(marketGoodsExample);
         return marketGoodList;
     }
+
+    @Override
+    public List<MarketGoodsSpecification> selectSpecificationByGoodsId(int goodsId) {
+
+        MarketGoodsSpecificationExample marketGoodsSpecificationExample = new MarketGoodsSpecificationExample();
+        marketGoodsSpecificationExample.createCriteria()
+                .andGoodsIdEqualTo(goodsId)
+                .andDeletedEqualTo(false);
+        List<MarketGoodsSpecification> marketGoodsSpecificationList = marketGoodsSpecificationMapper.selectByExample(marketGoodsSpecificationExample);
+        return marketGoodsSpecificationList;
+    }
 }

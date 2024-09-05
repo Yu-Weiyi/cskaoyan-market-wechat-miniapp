@@ -1,6 +1,8 @@
 package happy.coding.service;
 
 import happy.coding.bean.model.MarketGoods;
+import happy.coding.bean.model.MarketGoodsProduct;
+import happy.coding.bean.model.MarketGoodsSpecification;
 
 import java.util.List;
 import java.util.Map;
@@ -27,4 +29,6 @@ public interface GoodsService {
     Map<String, Object> detail(int goodsId);
 
     List<MarketGoods> list(Integer categoryId, Integer brandId, int page, int limit);
+
+    List<MarketGoodsSpecification> selectSpecificationByGoodsId(int goodsId);
 }
