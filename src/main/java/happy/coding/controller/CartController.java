@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -132,5 +133,25 @@ public class CartController {
 
         cartService.update(cartUpdateParam);
         return BaseRespVo.success();
+    }
+
+    @PostMapping("/delete")
+    @Operation(
+            summary = "购物车删除接口", description = "删除用户购物车中的商品项。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo delete(@RequestBody Map<String, List<Integer>> map) {
+
+        if (map.get("productIds") == null || map.get("productIds").isEmpty()) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        Map<String, Object> index = cartService.delete(map.get("productIds"));
+        return BaseRespVo.success(index);
     }
 }

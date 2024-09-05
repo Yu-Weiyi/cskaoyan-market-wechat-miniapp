@@ -146,6 +146,22 @@ public class CartServiceImpl implements CartService {
         marketCartMapper.updateByExampleSelective(marketCart, marketCartExample);
     }
 
+    @Override
+    public Map<String, Object> delete(List<Integer> productIds) {
+
+        MarketCartExample marketCartExample = new MarketCartExample();
+        marketCartExample.createCriteria()
+                .andUserIdEqualTo(UserInfoContext.getUserId())
+                .andProductIdIn(productIds)
+                .andDeletedEqualTo(false);
+        MarketCart marketCart = new MarketCart();
+        marketCart.setDeleted(true);
+        marketCart.setUpdateTime(new Date());
+        marketCartMapper.updateByExampleSelective(marketCart, marketCartExample);
+
+        return index();
+    }
+
     private List<MarketCart> listAll() {
 
         Integer userId = UserInfoContext.getUserId();

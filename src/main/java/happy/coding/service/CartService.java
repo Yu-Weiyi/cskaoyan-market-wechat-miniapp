@@ -4,6 +4,7 @@ import happy.coding.bean.vo.param.CartAddParam;
 import happy.coding.bean.vo.param.CartCheckedParam;
 import happy.coding.bean.vo.param.CartUpdateParam;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,4 +27,6 @@ public interface CartService {
     Map<String, Object> checked(CartCheckedParam cartCheckedParam);
 
     void update(CartUpdateParam cartUpdateParam);
+
+    Map<String, Object> delete(List<Integer> productIds);
 }
