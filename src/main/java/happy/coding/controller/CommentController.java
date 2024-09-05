@@ -1,5 +1,6 @@
 package happy.coding.controller;
 
+import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.model.MarketComment;
 import happy.coding.bean.vo.BaseRespVo;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -45,6 +47,7 @@ public class CommentController {
                     @ApiResponse(responseCode = "200-1", description = "参数错误")
             }
     )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
     public BaseRespVo list(@RequestParam Integer valueId, @RequestParam Byte type, @RequestParam Byte showType, @RequestParam Integer page, @RequestParam Integer limit) {
 
         if (valueId == null || valueId <= 0 ||
@@ -60,4 +63,24 @@ public class CommentController {
         return BaseRespVo.successPage(marketCommentList);
     }
 
+    @GetMapping("/count")
+    @Operation(
+            summary = "评论数量接口", description = "查询评论数量。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo count(@RequestParam Integer valueId, @RequestParam Byte type) {
+
+        if (valueId == null || valueId <= 0 ||
+                type == null || type != 0 && type != 1
+        ) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        Map<String, Long> count = commentService.count(valueId, type);
+        return BaseRespVo.success(count);
+    }
 }

@@ -4,6 +4,7 @@ import happy.coding.bean.model.MarketComment;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -17,4 +18,6 @@ import java.util.List;
 public interface CommentService {
 
     List<MarketComment> list(int valueId, byte type, int page, int limit);
+
+    Map<String, Long> count(int valueId, byte type);
 }
