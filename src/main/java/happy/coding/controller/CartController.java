@@ -5,6 +5,7 @@ import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.vo.BaseRespVo;
 import happy.coding.bean.vo.param.CartAddParam;
 import happy.coding.bean.vo.param.CartCheckedParam;
+import happy.coding.bean.vo.param.CartUpdateParam;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.exception.ParamException;
 import happy.coding.service.CartService;
@@ -107,5 +108,29 @@ public class CartController {
 
         Map<String, Object> index = cartService.checked(cartCheckedParam);
         return BaseRespVo.success(index);
+    }
+
+    @PostMapping("/update")
+    @Operation(
+            summary = "购物车更新接口", description = "更新用户购物车中的商品数量。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo update(@RequestBody CartUpdateParam cartUpdateParam) {
+
+        if (cartUpdateParam.getId() == null || cartUpdateParam.getId() <= 0 ||
+                cartUpdateParam.getNumber() == null || cartUpdateParam.getNumber() <= 0 ||
+                cartUpdateParam.getGoodsId() == null || cartUpdateParam.getGoodsId() <= 0 ||
+                cartUpdateParam.getProductId() == null || cartUpdateParam.getProductId() <= 0
+        ) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        cartService.update(cartUpdateParam);
+        return BaseRespVo.success();
     }
 }

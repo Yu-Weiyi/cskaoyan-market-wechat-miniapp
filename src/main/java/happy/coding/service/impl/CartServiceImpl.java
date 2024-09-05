@@ -3,6 +3,7 @@ package happy.coding.service.impl;
 import happy.coding.bean.model.*;
 import happy.coding.bean.vo.param.CartAddParam;
 import happy.coding.bean.vo.param.CartCheckedParam;
+import happy.coding.bean.vo.param.CartUpdateParam;
 import happy.coding.context.UserInfoContext;
 import happy.coding.mapper.MarketCartMapper;
 import happy.coding.mapper.MarketGoodsMapper;
@@ -127,6 +128,22 @@ public class CartServiceImpl implements CartService {
         marketCartMapper.updateByExampleSelective(marketCart, marketCartExample);
 
         return index();
+    }
+
+    @Override
+    public void update(CartUpdateParam cartUpdateParam) {
+
+        MarketCartExample marketCartExample = new MarketCartExample();
+        marketCartExample.createCriteria()
+                .andIdEqualTo(cartUpdateParam.getId())
+                .andUserIdEqualTo(UserInfoContext.getUserId())
+                .andGoodsIdEqualTo(cartUpdateParam.getGoodsId())
+                .andProductIdEqualTo(cartUpdateParam.getProductId())
+                .andDeletedEqualTo(false);
+        MarketCart marketCart = new MarketCart();
+        marketCart.setNumber(cartUpdateParam.getNumber());
+        marketCart.setUpdateTime(new Date());
+        marketCartMapper.updateByExampleSelective(marketCart, marketCartExample);
     }
 
     private List<MarketCart> listAll() {
