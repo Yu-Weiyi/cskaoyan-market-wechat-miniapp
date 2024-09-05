@@ -1,5 +1,9 @@
 package happy.coding.service;
 
+import happy.coding.bean.vo.data.OrderListData;
+
+import java.util.List;
+
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
  * @version 0.1
@@ -20,4 +24,6 @@ public interface OrderService {
     long countUnrecv();
 
     long countUnComment();
+
+    List<OrderListData> list(int showType, int page, int limit);
 }

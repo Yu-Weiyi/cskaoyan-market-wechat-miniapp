@@ -1,11 +1,28 @@
 package happy.coding.service.impl;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import happy.coding.bean.model.MarketOrder;
 import happy.coding.bean.model.MarketOrderExample;
+import happy.coding.bean.model.MarketOrderGoods;
+import happy.coding.bean.model.MarketOrderGoodsExample;
+import happy.coding.bean.vo.data.HandleOptionData;
+import happy.coding.bean.vo.data.OrderListData;
+import happy.coding.constant.ErrorCodeConstant;
+import happy.coding.constant.OrderStatusConstant;
+import happy.coding.context.PageInfoContext;
 import happy.coding.context.UserInfoContext;
+import happy.coding.exception.QueryException;
+import happy.coding.mapper.MarketOrderGoodsMapper;
 import happy.coding.mapper.MarketOrderMapper;
+import happy.coding.service.GroupService;
 import happy.coding.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -20,7 +37,11 @@ import org.springframework.stereotype.Service;
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
-    MarketOrderMapper marketOrderMapper;
+    private MarketOrderMapper marketOrderMapper;
+    @Autowired
+    private GroupService groupService;
+    @Autowired
+    private MarketOrderGoodsMapper marketOrderGoodsMapper;
 
     @Override
     public long countByStatus(short status) {
@@ -57,5 +78,53 @@ public class OrderServiceImpl implements OrderService {
     public long countUnComment() {
 
         return countByStatus((short) 101);
+    }
+
+    @Override
+    public List<OrderListData> list(int showType, int page, int limit) {
+
+        int userId = UserInfoContext.getUserId();
+
+        MarketOrderExample marketOrderExample = new MarketOrderExample();
+        marketOrderExample.createCriteria()
+                .andUserIdEqualTo(userId)
+                .andDeletedEqualTo(false);
+        marketOrderExample.setOrderByClause("add_time DESC");
+        if (page > 0 && limit > 0) {
+            PageHelper.startPage(page, limit);
+        }
+        List<MarketOrder> marketOrderList = marketOrderMapper.selectByExample(marketOrderExample);
+
+        PageInfo pageInfo = new PageInfo<>(marketOrderList);
+        PageInfoContext.serPageInfo(pageInfo);
+
+        List<OrderListData> list = new ArrayList<>();
+        for (MarketOrder marketOrder : marketOrderList) {
+            OrderListData orderListData = new OrderListData();
+            orderListData.setActualPrice(marketOrder.getActualPrice());
+            orderListData.setAftersaleStatus(marketOrder.getAftersaleStatus());
+            orderListData.setId(marketOrder.getId());
+            orderListData.setOrderSn(marketOrder.getOrderSn());
+
+            orderListData.setIsGroupin(groupService.isGroupIn(marketOrder.getId()));
+
+            MarketOrderGoodsExample marketOrderGoodsExample = new MarketOrderGoodsExample();
+            marketOrderGoodsExample.createCriteria()
+                    .andOrderIdEqualTo(marketOrder.getId())
+                    .andDeletedEqualTo(false);
+            List<MarketOrderGoods> marketOrderGoodsList = marketOrderGoodsMapper.selectByExample(marketOrderGoodsExample);
+            orderListData.setGoodsList(marketOrderGoodsList);
+
+            for (OrderStatusConstant constant : OrderStatusConstant.values()) {
+                if (constant.getOrderStatus() == marketOrder.getOrderStatus()) {
+                    orderListData.setOrderStatusText(constant.getOrderStatusText());
+                    orderListData.setHandleOption(constant.getHandleOption());
+                    break;
+                }
+            }
+
+            list.add(orderListData);
+        }
+        return list;
     }
 }

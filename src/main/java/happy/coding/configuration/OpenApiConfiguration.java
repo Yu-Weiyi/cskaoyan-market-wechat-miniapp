@@ -36,12 +36,14 @@ public class OpenApiConfiguration {
         OpenAPI openApi = new OpenAPI()
                 .info(
                         new Info()
-                                .title("快乐写代码 项目二 OpenAPI接口文档")
+                                .title("HAPPY CODING 项目二 OpenAPI接口文档")
                                 .description("happy.coding project-two OpenAPI Document")
                                 .version("version 1.0.0")
                                 .contact(
                                         new Contact()
-                                                .name("happy.coding 项目组")
+                                                .name("于魏祎")
+                                                .email("yu_weiyi@outlook.com")
+                                                .url("https://github.com/Yu-Weiyi")
                                 )
                 );
         log.info("配置 OpenAPI 接口文档具体信息。");

@@ -1,5 +1,6 @@
 package happy.coding.constant;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
@@ -12,6 +13,7 @@ import lombok.Getter;
  * @since 2024-08-31 10:54
  */
 @Getter
+@AllArgsConstructor
 public enum ErrorCodeConstant {
 
     API_NOT_IMPLEMENTED(-2, "接口未实现"),
@@ -34,10 +36,4 @@ public enum ErrorCodeConstant {
 
     private final int errno;
     private final String errmsg;
-
-    ErrorCodeConstant(int errno, String errmsg) {
-
-        this.errno = errno;
-        this.errmsg = errmsg;
-    }
 }
