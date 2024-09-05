@@ -21,4 +21,6 @@ public interface AddressService {
     int save(AddressSaveParam addressSaveParam);
 
     MarketAddress detail(Integer addressId);
+
+    void delete(Integer addressId);
 }

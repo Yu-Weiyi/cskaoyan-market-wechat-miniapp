@@ -87,4 +87,17 @@ public class AddressServiceImpl implements AddressService {
         }
         return marketAddressList.get(0);
     }
+
+    @Override
+    public void delete(Integer addressId) {
+
+        MarketAddress record = new MarketAddress();
+        record.setUpdateTime(new Date());
+        record.setDeleted(true);
+        MarketAddressExample marketAddressExample = new MarketAddressExample();
+        marketAddressExample.createCriteria()
+                .andIdEqualTo(addressId)
+                .andUserIdEqualTo(UserInfoContext.getUserId());
+        marketAddressMapper.updateByExampleSelective(record, marketAddressExample);
+    }
 }

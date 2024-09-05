@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -98,5 +99,15 @@ public class AddressController {
 
         MarketAddress detail = addressService.detail(id);
         return BaseRespVo.success(detail);
+    }
+
+    public BaseRespVo delete(@RequestBody Map<String, Integer> mapParam) {
+
+        if (mapParam == null || mapParam.get("id") == null) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        addressService.delete(mapParam.get("id"));
+        return BaseRespVo.success();
     }
 }
