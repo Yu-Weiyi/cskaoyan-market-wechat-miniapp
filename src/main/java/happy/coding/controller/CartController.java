@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
  * @version 0.1
@@ -36,7 +38,8 @@ public class CartController {
     @Operation(
             summary = "购物车数量接口", description = "查询购物车内商品数量。",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "正常返回")
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
             }
     )
     @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
@@ -44,5 +47,20 @@ public class CartController {
 
         long count = cartService.goodscount();
         return BaseRespVo.success(count);
+    }
+
+    @GetMapping("/index")
+    @Operation(
+            summary = "购物车总览接口", description = "查询购物车总览信息。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo index() {
+
+        Map<String, Object> index = cartService.index();
+        return BaseRespVo.success(index);
     }
 }

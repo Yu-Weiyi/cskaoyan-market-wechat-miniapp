@@ -42,7 +42,8 @@ public class HomeController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "正常返回"),
                     @ApiResponse(responseCode = "200-10", description = "查询失败"),
-                    @ApiResponse(responseCode = "200-11", description = "系统全局参数错误")
+                    @ApiResponse(responseCode = "200-11", description = "系统全局参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
             }
     )
     @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")

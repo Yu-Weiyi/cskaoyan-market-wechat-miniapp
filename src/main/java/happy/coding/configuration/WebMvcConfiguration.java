@@ -50,7 +50,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
         interceptorRegistry.addInterceptor(fullAuthJwtTokenInterceptor)
                 .addPathPatterns("/user/**")
-                .addPathPatterns("/footprint/**");
+                .addPathPatterns("/footprint/**")
+                .addPathPatterns("/cart/**").excludePathPatterns("/cart/goodscount/**");
 
         interceptorRegistry.addInterceptor(harfAuthJwtTokenInterceptor)
                 .addPathPatterns("/cart/goodscount/**")

@@ -1,5 +1,7 @@
 package happy.coding.service;
 
+import java.util.Map;
+
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
  * @version 0.1
@@ -12,4 +14,6 @@ package happy.coding.service;
 public interface CartService {
 
     long goodscount();
+
+    Map<String, Object> index();
 }
