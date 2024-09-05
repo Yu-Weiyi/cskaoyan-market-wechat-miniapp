@@ -206,6 +206,32 @@ public class OrderServiceImpl implements OrderService {
         update(orderId, List.of(OrderStatusConstant.SHIPPED), OrderStatusConstant.USER_RECEIVED);
     }
 
+    @Override
+    public void delete(Integer orderId) {
+
+        MarketOrder marketOrder = marketOrderMapper.selectByPrimaryKey(orderId);
+
+        if (!List.of(
+                OrderStatusConstant.USER_RECEIVED.getOrderStatus(),
+                OrderStatusConstant.SYSTEM_RECEIVED.getOrderStatus(),
+                OrderStatusConstant.USER_CANCELLED.getOrderStatus(),
+                OrderStatusConstant.SYSTEM_CANCELLED.getOrderStatus(),
+                OrderStatusConstant.REFUNDED.getOrderStatus()
+        ).contains(marketOrder.getOrderStatus())) {
+            throw new StatusException(ErrorCodeConstant.ORDER_STATUS_ERROR);
+        }
+
+        if (!marketOrder.getUserId().equals(UserInfoContext.getUserId())) {
+            throw new StatusException(ErrorCodeConstant.ORDER_STATUS_ERROR);
+        }
+
+        MarketOrder update = new MarketOrder();
+        update.setId(orderId);
+        update.setDeleted(true);
+        update.setUpdateTime(new Date());
+        marketOrderMapper.updateByPrimaryKeySelective(update);
+    }
+
     private void update(Integer orderId, List<OrderStatusConstant> conditionalStatusList, OrderStatusConstant newStatus) {
 
         MarketOrder marketOrder = marketOrderMapper.selectByPrimaryKey(orderId);

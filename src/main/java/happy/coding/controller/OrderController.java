@@ -137,4 +137,24 @@ public class OrderController {
         orderService.confirm(mapParam.get("orderId"));
         return BaseRespVo.success();
     }
+
+    @PostMapping("/delete")
+    @Operation(
+            summary = "订单删除接口", description = "用户删除已完成订单记录。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo delete(@RequestBody Map<String, Integer> mapParam) {
+
+        if (mapParam == null || mapParam.get("orderId") == null || mapParam.get("orderId") < 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        orderService.delete(mapParam.get("orderId"));
+        return BaseRespVo.success();
+    }
 }
