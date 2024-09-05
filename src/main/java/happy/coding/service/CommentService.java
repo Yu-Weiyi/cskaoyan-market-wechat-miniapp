@@ -1,6 +1,7 @@
 package happy.coding.service;
 
 import happy.coding.bean.model.MarketComment;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -15,5 +16,5 @@ import java.util.List;
  */
 public interface CommentService {
 
-    List<MarketComment> listByGoodsId(int goodsId);
+    List<MarketComment> list(int valueId, byte type, int page, int limit);
 }

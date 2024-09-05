@@ -1,5 +1,6 @@
 package happy.coding.service.impl;
 
+import com.github.pagehelper.PageHelper;
 import happy.coding.bean.model.MarketComment;
 import happy.coding.bean.model.MarketCommentExample;
 import happy.coding.mapper.MarketCommentMapper;
@@ -26,14 +27,17 @@ public class CommentServiceImpl implements CommentService {
     private MarketCommentMapper marketCommentMapper;
 
     @Override
-    public List<MarketComment> listByGoodsId(int goodsId) {
+    public List<MarketComment> list(int valueId, byte type, int page, int limit) {
 
         MarketCommentExample marketCommentExample = new MarketCommentExample();
         marketCommentExample.createCriteria()
-                .andValueIdEqualTo(goodsId)
-                .andTypeEqualTo((byte) 0)
+                .andValueIdEqualTo(valueId)
+                .andTypeEqualTo(type)
                 .andDeletedEqualTo(false);
         marketCommentExample.setOrderByClause("add_time DESC");
+        if (page > 0 && limit > 0) {
+            PageHelper.startPage(page, limit);
+        }
         List<MarketComment> marketCommentList = marketCommentMapper.selectByExample(marketCommentExample);
         return marketCommentList;
     }

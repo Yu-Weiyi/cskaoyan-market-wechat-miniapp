@@ -141,7 +141,7 @@ public class GoodsServiceImpl implements GoodsService {
         });
         FutureTask<MarketBrand> brandTask = new FutureTask<>(() -> brandService.selectById(marketGoods.getBrandId()));
         FutureTask<Map<String, Object>> commentTask = new FutureTask<>(() -> {
-            List<MarketComment> marketCommentList = commentService.listByGoodsId(goodsId);
+            List<MarketComment> marketCommentList = commentService.list(goodsId, (byte) 0, 0, 0);
             Map<String, Object> map = new HashMap<>();
             map.put("data", marketCommentList);
             map.put("count", marketCommentList.size());
