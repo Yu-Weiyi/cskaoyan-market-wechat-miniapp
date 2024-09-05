@@ -3,6 +3,7 @@ package happy.coding.service.impl;
 import com.github.pagehelper.PageHelper;
 import happy.coding.bean.model.MarketAddress;
 import happy.coding.bean.model.MarketAddressExample;
+import happy.coding.bean.vo.param.AddressSaveParam;
 import happy.coding.context.UserInfoContext;
 import happy.coding.mapper.MarketAddressMapper;
 import happy.coding.service.AddressService;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,9 +41,35 @@ public class AddressServiceImpl implements AddressService {
         if (marketAddressList == null || marketAddressList.isEmpty()) {
             return new ArrayList<>();
         }
-        MarketAddress defaultAddress = marketAddressList.stream().filter(item -> item.getIsDefault()).findFirst().orElse(null);
-        marketAddressList.remove(defaultAddress);
-        marketAddressList.set(0, defaultAddress);
         return marketAddressList;
+    }
+
+    @Override
+    public int save(AddressSaveParam addressSaveParam) {
+
+        if (addressSaveParam.getIsDefault()) {
+            MarketAddress record = new MarketAddress();
+            record.setIsDefault(false);
+            record.setUpdateTime(new Date());
+            MarketAddressExample marketAddressExample = new MarketAddressExample();
+            marketAddressExample.createCriteria()
+                    .andUserIdEqualTo(UserInfoContext.getUserId())
+                    .andIsDefaultEqualTo(true)
+                    .andDeletedEqualTo(false);
+            marketAddressMapper.updateByExampleSelective(record, marketAddressExample);
+        }
+
+        MarketAddress marketAddress = new MarketAddress();
+        marketAddress.setName(addressSaveParam.getName());
+        marketAddress.setUserId(UserInfoContext.getUserId());
+        marketAddress.setProvince(addressSaveParam.getProvince());
+        marketAddress.setCity(addressSaveParam.getCity());
+        marketAddress.setCounty(addressSaveParam.getCounty());
+        marketAddress.setAddressDetail(addressSaveParam.getAddressDetail());
+        marketAddress.setAreaCode(addressSaveParam.getAreaCode());
+        marketAddress.setTel(addressSaveParam.getTel());
+        marketAddress.setIsDefault(addressSaveParam.getIsDefault());
+        marketAddressMapper.insertSelective(marketAddress);
+        return marketAddress.getId();
     }
 }

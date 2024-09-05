@@ -4,15 +4,16 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.model.MarketAddress;
 import happy.coding.bean.vo.BaseRespVo;
+import happy.coding.bean.vo.param.AddressSaveParam;
+import happy.coding.constant.ErrorCodeConstant;
+import happy.coding.exception.ParamException;
 import happy.coding.service.AddressService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -48,5 +49,34 @@ public class AddressController {
 
         List<MarketAddress> list = addressService.list();
         return BaseRespVo.successPage(list);
+    }
+
+    @PostMapping("/save")
+    @Operation(
+            summary = "收货地址保存接口", description = "保存用户收货地址。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo save(@RequestBody AddressSaveParam addressSaveParam) {
+
+        if (addressSaveParam == null ||
+                addressSaveParam.getId() == null ||
+                addressSaveParam.getName() == null ||
+                addressSaveParam.getTel() == null ||
+                addressSaveParam.getAddressDetail() == null ||
+                addressSaveParam.getAreaCode() == null ||
+                addressSaveParam.getProvince()== null ||
+                addressSaveParam.getCity() == null ||
+                addressSaveParam.getCounty() == null
+        ) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        int newAddressId = addressService.save(addressSaveParam);
+        return BaseRespVo.success(newAddressId);
     }
 }

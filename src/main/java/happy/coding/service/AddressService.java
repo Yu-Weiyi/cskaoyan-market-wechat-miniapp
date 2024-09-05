@@ -1,6 +1,7 @@
 package happy.coding.service;
 
 import happy.coding.bean.model.MarketAddress;
+import happy.coding.bean.vo.param.AddressSaveParam;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ import java.util.List;
 public interface AddressService {
 
     List<MarketAddress> list();
+
+    int save(AddressSaveParam addressSaveParam);
 }
