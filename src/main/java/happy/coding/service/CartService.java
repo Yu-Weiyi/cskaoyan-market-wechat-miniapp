@@ -2,6 +2,7 @@ package happy.coding.service;
 
 import happy.coding.bean.vo.param.CartAddParam;
 import happy.coding.bean.vo.param.CartCheckedParam;
+import happy.coding.bean.vo.param.CartFastaddParam;
 import happy.coding.bean.vo.param.CartUpdateParam;
 
 import java.util.List;
@@ -29,4 +30,6 @@ public interface CartService {
     void update(CartUpdateParam cartUpdateParam);
 
     Map<String, Object> delete(List<Integer> productIds);
+
+    int fastadd(CartFastaddParam cartFastaddParam);
 }

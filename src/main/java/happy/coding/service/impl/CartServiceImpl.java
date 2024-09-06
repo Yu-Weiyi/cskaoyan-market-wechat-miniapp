@@ -3,6 +3,7 @@ package happy.coding.service.impl;
 import happy.coding.bean.model.*;
 import happy.coding.bean.vo.param.CartAddParam;
 import happy.coding.bean.vo.param.CartCheckedParam;
+import happy.coding.bean.vo.param.CartFastaddParam;
 import happy.coding.bean.vo.param.CartUpdateParam;
 import happy.coding.context.UserInfoContext;
 import happy.coding.mapper.MarketCartMapper;
@@ -160,6 +161,31 @@ public class CartServiceImpl implements CartService {
         marketCartMapper.updateByExampleSelective(marketCart, marketCartExample);
 
         return index();
+    }
+
+    @Override
+    public int fastadd(CartFastaddParam cartFastaddParam) {
+
+        Date now = new Date();
+        MarketGoods marketGoods = marketGoodsMapper.selectByPrimaryKey(cartFastaddParam.getGoodsId());
+        MarketGoodsProduct marketGoodsProduct = marketGoodsProductMapper.selectByPrimaryKey(cartFastaddParam.getProductId());
+
+        MarketCart marketCart = new MarketCart();
+        marketCart.setUserId(UserInfoContext.getUserId());
+        marketCart.setGoodsId(cartFastaddParam.getGoodsId());
+        marketCart.setGoodsSn(marketGoods.getGoodsSn());
+        marketCart.setGoodsName(marketGoods.getName());
+        marketCart.setProductId(cartFastaddParam.getProductId());
+        marketCart.setPrice(marketGoodsProduct.getPrice());
+        marketCart.setNumber(cartFastaddParam.getNumber());
+        marketCart.setSpecifications(marketGoodsProduct.getSpecifications());
+        marketCart.setChecked(true);
+        marketCart.setPicUrl(marketGoodsProduct.getUrl());
+        marketCart.setAddTime(now);
+        marketCart.setUpdateTime(now);
+        marketCart.setDeleted(false);
+        marketCartMapper.insertSelective(marketCart);
+        return marketCart.getId();
     }
 
     private List<MarketCart> listAll() {

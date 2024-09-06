@@ -5,6 +5,7 @@ import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.vo.BaseRespVo;
 import happy.coding.bean.vo.param.CartAddParam;
 import happy.coding.bean.vo.param.CartCheckedParam;
+import happy.coding.bean.vo.param.CartFastaddParam;
 import happy.coding.bean.vo.param.CartUpdateParam;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.exception.ParamException;
@@ -153,5 +154,20 @@ public class CartController {
 
         Map<String, Object> index = cartService.delete(map.get("productIds"));
         return BaseRespVo.success(index);
+    }
+
+    @PostMapping("/fastadd")
+    @Operation(
+            summary = "购物车立即购买接口", description = "立即购买当前商品。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    public BaseRespVo fastadd(@RequestBody CartFastaddParam cartFastaddParam) {
+
+        int cartId = cartService.fastadd(cartFastaddParam);
+        return BaseRespVo.success(cartId);
     }
 }
