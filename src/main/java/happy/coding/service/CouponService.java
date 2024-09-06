@@ -24,4 +24,6 @@ public interface CouponService {
     List<MarketCoupon> mylist(short status, int page, int limit);
 
     void receive(int couponId);
+
+    void exchange(String code);
 }

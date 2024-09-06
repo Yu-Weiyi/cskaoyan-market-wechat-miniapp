@@ -100,4 +100,22 @@ public class CouponController {
         couponService.receive(couponId);
         return BaseRespVo.success();
     }
+
+    @PostMapping("/exchange")
+    @Operation(
+            summary = "用户优惠券兑换接口", description = "兑换用户优惠券。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo exchange(@RequestBody Map<String, String> mapParam) {
+
+        String code = mapParam.get("code");
+
+        couponService.exchange(code);
+        return BaseRespVo.success();
+    }
 }

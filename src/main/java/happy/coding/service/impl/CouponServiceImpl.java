@@ -1,10 +1,7 @@
 package happy.coding.service.impl;
 
 import com.github.pagehelper.PageHelper;
-import happy.coding.bean.model.MarketCoupon;
-import happy.coding.bean.model.MarketCouponExample;
-import happy.coding.bean.model.MarketCouponUser;
-import happy.coding.bean.model.MarketCouponUserExample;
+import happy.coding.bean.model.*;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.UserInfoContext;
 import happy.coding.exception.QueryException;
@@ -141,10 +138,75 @@ public class CouponServiceImpl implements CouponService {
         }
 
         MarketCouponUserExample marketCouponUserExample = new MarketCouponUserExample();
-        marketCouponUserExample.createCriteria()
+        MarketCouponUserExample.Criteria criteria = marketCouponUserExample.createCriteria();
+        criteria
                 .andCouponIdEqualTo(couponId)
                 .andDeletedEqualTo(false);
-        if (marketCoupon.getTotal() <= marketCouponUserMapper.countByExample(marketCouponUserExample)) {
+        long countAllUser = marketCouponUserMapper.countByExample(marketCouponUserExample);
+        if (marketCoupon.getTotal() <= countAllUser) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+
+        criteria.andUserIdEqualTo(userId);
+        long countThisUser = marketCouponUserMapper.countByExample(marketCouponUserExample);
+        if (marketCoupon.getLimit() <= countThisUser) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+
+        // check pass
+        MarketCouponUser marketCouponUser = new MarketCouponUser();
+        marketCouponUser.setUserId(userId);
+        marketCouponUser.setCouponId(couponId);
+        marketCouponUser.setStatus((short) 0);
+        marketCouponUser.setStartTime(marketCoupon.getStartTime());
+        marketCouponUser.setEndTime(marketCoupon.getEndTime());
+        marketCouponUser.setAddTime(now);
+        marketCouponUser.setUpdateTime(now);
+        marketCouponUser.setDeleted(false);
+        marketCouponUserMapper.insertSelective(marketCouponUser);
+    }
+
+    @Override
+    public void exchange(String code) {
+
+        MarketCouponExample marketCouponExample = new MarketCouponExample();
+        marketCouponExample.createCriteria()
+                .andTypeEqualTo((short) 2)
+                .andStatusEqualTo((short) 0)
+                .andCodeEqualTo(code)
+                .andDeletedEqualTo(false);
+        List<MarketCoupon> marketCouponList = marketCouponMapper.selectByExample(marketCouponExample);
+
+        if (marketCouponList == null || marketCouponList.isEmpty()) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+
+        MarketCoupon marketCoupon = marketCouponList.get(0);
+        int userId = UserInfoContext.getUserId();
+        Date now = new Date();
+        int couponId = marketCoupon.getId();
+
+        if (marketCoupon.getEndTime() != null && marketCoupon.getEndTime().before(now)) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+
+        if (marketCoupon.getDeleted()) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+
+        MarketCouponUserExample marketCouponUserExample = new MarketCouponUserExample();
+        MarketCouponUserExample.Criteria criteria = marketCouponUserExample.createCriteria();
+        criteria
+                .andCouponIdEqualTo(couponId)
+                .andDeletedEqualTo(false);
+        long countAllUser = marketCouponUserMapper.countByExample(marketCouponUserExample);
+        if (marketCoupon.getTotal() <= countAllUser) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+
+        criteria.andUserIdEqualTo(userId);
+        long countThisUser = marketCouponUserMapper.countByExample(marketCouponUserExample);
+        if (marketCoupon.getLimit() <= countThisUser) {
             throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
         }
 
