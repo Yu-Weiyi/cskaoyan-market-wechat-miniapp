@@ -20,4 +20,6 @@ public interface CouponService {
     List<MarketCoupon> listByStatus(short status, int page, int limit);
 
     List<MarketCoupon> list(int page, int limit);
+
+    List<MarketCoupon> mylist(short status, int page, int limit);
 }

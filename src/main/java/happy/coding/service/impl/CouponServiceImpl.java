@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,10 +37,14 @@ public class CouponServiceImpl implements CouponService {
     public List<MarketCoupon> listUserAvailable(int page, int limit) {
 
         Integer userId = UserInfoContext.getUserId();
+        Date now = new Date();
+
         List<MarketCoupon> marketCouponList = listByStatus((short) 0, 1, 0);// TODO 引入Redis缓存机制 使用分次查询
         MarketCouponUserExample marketCouponUserExample = new MarketCouponUserExample();
         marketCouponUserExample.createCriteria()
                 .andUserIdEqualTo(userId)
+                .andStartTimeLessThanOrEqualTo(now)
+                .andEndTimeGreaterThanOrEqualTo(now)
                 .andDeletedEqualTo(false);
         List<MarketCouponUser> marketCouponUserList = marketCouponUserMapper.selectByExample(marketCouponUserExample);
         List<Integer> alreadyGotCouponIds = marketCouponUserList.stream()
@@ -77,5 +82,32 @@ public class CouponServiceImpl implements CouponService {
             list = listByStatus((short) 0, page, limit);
         }
         return list == null ? new ArrayList<>() : list;
+    }
+
+    @Override
+    public List<MarketCoupon> mylist(short status, int page, int limit) {
+
+        MarketCouponUserExample marketCouponUserExample = new MarketCouponUserExample();
+        marketCouponUserExample.createCriteria()
+                .andUserIdEqualTo(UserInfoContext.getUserId())
+                .andStatusEqualTo(status)
+                .andDeletedEqualTo(false);
+        marketCouponUserExample.setOrderByClause("add_time DESC");
+        if (page > 0 && limit > 0) {
+            PageHelper.startPage(page, limit);
+        }
+        List<MarketCouponUser> marketCouponUserList = marketCouponUserMapper.selectByExample(marketCouponUserExample);
+        List<Integer> couponIdList = marketCouponUserList.stream().map(item -> item.getCouponId()).toList();
+
+        if (couponIdList == null || couponIdList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        MarketCouponExample marketCouponExample = new MarketCouponExample();
+        marketCouponExample.createCriteria()
+                .andIdIn(couponIdList)
+                .andDeletedEqualTo(false);
+        List<MarketCoupon> marketCouponList = marketCouponMapper.selectByExample(marketCouponExample);
+        return marketCouponList;
     }
 }

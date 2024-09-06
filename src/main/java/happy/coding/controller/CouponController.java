@@ -64,4 +64,24 @@ public class CouponController {
             return BaseRespVo.successPage(list);
         }
     }
+
+    @GetMapping("/mylist")
+    @Operation(
+            summary = "用户优惠券列表接口", description = "查询用户优惠券列表信息，分页。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo mylist(@RequestParam Short status, @RequestParam Integer page, @RequestParam Integer limit) {
+
+        if (status == null || !List.of((short) 0, (short) 1, (short) 2).contains(status) ||page == null || page <= 0 || limit == null ||limit <= 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        List<MarketCoupon> mylist = couponService.mylist(status, page, limit);
+        return BaseRespVo.successPage(mylist);
+    }
 }
