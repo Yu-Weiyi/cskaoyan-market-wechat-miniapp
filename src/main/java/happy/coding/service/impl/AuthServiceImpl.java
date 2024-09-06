@@ -10,6 +10,7 @@ import happy.coding.exception.ParamException;
 import happy.coding.mapper.MarketUserMapper;
 import happy.coding.service.AuthService;
 import happy.coding.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2024-09-02 19:11
  */
 @Service
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     @Autowired
@@ -95,6 +97,24 @@ public class AuthServiceImpl implements AuthService {
         userInfo.put("nickName", marketUser.getNickname());
         userInfo.put("avatarUrl", marketUser.getAvatar());
         return new AuthLoginData(jwt, userInfo);
+    }
+
+    @Override
+    public void authenticate(String jwtToken) {
+
+        log.debug("校验 JWT(" + jwtToken + ")");
+        Integer userId = Integer.valueOf(jwtUtil.extractId(jwtToken));
+
+        String storedJwtToken = (String) redisTemplate.opsForValue().get(userId.toString());
+        if (storedJwtToken == null) {
+            throw new AuthException(ErrorCodeConstant.TOKEN_EXPIRED);
+        }
+        if (!storedJwtToken.equals(jwtToken)) {
+            throw new AuthException(ErrorCodeConstant.INVALID_TOKEN);
+        }
+
+        // auth pass
+        UserInfoContext.setUserId(userId);
     }
 
     /**

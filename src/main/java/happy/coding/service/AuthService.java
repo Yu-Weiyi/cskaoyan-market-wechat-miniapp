@@ -24,6 +24,8 @@ public interface AuthService {
      */
     AuthLoginData login(String username, String password);
 
+    void authenticate(String jwtToken);
+
     /**
      * @name logout
      * @description 登出。
