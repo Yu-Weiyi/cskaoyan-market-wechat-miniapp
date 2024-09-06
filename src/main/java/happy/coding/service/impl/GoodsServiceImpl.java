@@ -243,4 +243,21 @@ public class GoodsServiceImpl implements GoodsService {
         List<MarketGoodsSpecification> marketGoodsSpecificationList = marketGoodsSpecificationMapper.selectByExample(marketGoodsSpecificationExample);
         return marketGoodsSpecificationList;
     }
+
+    @Override
+    public List<MarketGoods> related(int goodsId) {
+
+        MarketGoods marketGoods = marketGoodsMapper.selectByPrimaryKey(goodsId);
+
+        MarketGoodsExample marketGoodsExample = new MarketGoodsExample();
+        marketGoodsExample.createCriteria()
+                .andCategoryIdEqualTo(marketGoods.getCategoryId())
+                .andIdNotEqualTo(goodsId)
+                .andDeletedEqualTo(false);
+        PageHelper.startPage(1, 10);
+        List<MarketGoods> marketGoodsList = marketGoodsMapper.selectByExample(marketGoodsExample);
+        return marketGoodsList;
+    }
+
+
 }

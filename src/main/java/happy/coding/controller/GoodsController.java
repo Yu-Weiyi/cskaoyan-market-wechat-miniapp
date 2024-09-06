@@ -113,4 +113,19 @@ public class GoodsController {
         Map<String, Object> detail = goodsService.detail(id);
         return BaseRespVo.success(detail);
     }
+
+    @GetMapping("/related")
+    @Operation(
+            summary = "相关商品接口", description = "查询相关商品，分页。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    public BaseRespVo related(@RequestParam Integer id) {
+
+        List<MarketGoods> related = goodsService.related(id);
+        return BaseRespVo.successPage(related);
+    }
 }

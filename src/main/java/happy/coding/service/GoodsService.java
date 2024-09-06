@@ -31,4 +31,6 @@ public interface GoodsService {
     List<MarketGoods> list(Integer categoryId, Integer brandId, int page, int limit);
 
     List<MarketGoodsSpecification> selectSpecificationByGoodsId(int goodsId);
+
+    List<MarketGoods> related(int goodsId);
 }
