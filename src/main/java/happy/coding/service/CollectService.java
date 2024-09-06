@@ -1,5 +1,7 @@
 package happy.coding.service;
 
+import java.util.List;
+
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
  * @version 0.1
@@ -14,4 +16,6 @@ public interface CollectService {
     boolean hasCollectedGoods(int goodsId);
 
     boolean hasCollectedTopic(int topicId);
+
+    List<? extends Object> list(byte type, int page, int limit);
 }
