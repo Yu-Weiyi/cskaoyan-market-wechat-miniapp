@@ -56,8 +56,8 @@ public class HomeServiceImpl implements HomeService {
         FutureTask<List> channelTask = new FutureTask<>(() -> categoryService.listAll("L1"));// TODO magic value
         FutureTask<List> couponListTask = new FutureTask<>(
                 UserInfoContext.isLogined() ?
-                        () -> couponService.listUserAvailable(3) :
-                        () -> couponService.list(1, 3)
+                        () -> couponService.listUserAvailable(1, 3) :
+                        () -> couponService.listByStatus((short) 0, 1, 3)
         );
         FutureTask<List> newGoodsListTask = new FutureTask<>(() -> {
             String value = systemMap.get("market_wx_index_hot");

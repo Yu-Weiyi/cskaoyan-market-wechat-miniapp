@@ -12,6 +12,7 @@ import happy.coding.service.CouponService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,10 +33,10 @@ public class CouponServiceImpl implements CouponService {
     MarketCouponUserMapper marketCouponUserMapper;
 
     @Override
-    public List<MarketCoupon> listUserAvailable(int limit) {
+    public List<MarketCoupon> listUserAvailable(int page, int limit) {
 
         Integer userId = UserInfoContext.getUserId();
-        List<MarketCoupon> marketCouponList = listAll();// TODO 引入Redis缓存机制 使用分次查询
+        List<MarketCoupon> marketCouponList = listByStatus((short) 0, 1, 0);// TODO 引入Redis缓存机制 使用分次查询
         MarketCouponUserExample marketCouponUserExample = new MarketCouponUserExample();
         marketCouponUserExample.createCriteria()
                 .andUserIdEqualTo(userId)
@@ -52,11 +53,11 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    public List<MarketCoupon> list(int page, int limit) {
+    public List<MarketCoupon> listByStatus(short status, int page, int limit) {
 
         MarketCouponExample marketCouponExample = new MarketCouponExample();
         marketCouponExample.createCriteria()
-                .andStatusEqualTo((short) 0)
+                .andStatusEqualTo(status)
                 .andDeletedEqualTo(false);
         marketCouponExample.setOrderByClause("add_time DESC");
         if (page > 0 && limit > 0) {
@@ -67,14 +68,14 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
-    public List<MarketCoupon> list(int limit) {
+    public List<MarketCoupon> list(int page, int limit) {
 
-        return list(1, limit);
-    }
-
-    @Override
-    public List<MarketCoupon> listAll() {
-
-        return list(1, 0);
+        List<MarketCoupon> list;
+        if (UserInfoContext.isLogined()) {
+            list = listUserAvailable(page, limit);
+        } else {
+            list = listByStatus((short) 0, page, limit);
+        }
+        return list == null ? new ArrayList<>() : list;
     }
 }

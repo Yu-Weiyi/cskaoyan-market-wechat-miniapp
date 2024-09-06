@@ -15,11 +15,9 @@ import java.util.List;
  */
 public interface CouponService {
 
-    List<MarketCoupon> listUserAvailable(int limit);
+    List<MarketCoupon> listUserAvailable(int page, int limit);
+
+    List<MarketCoupon> listByStatus(short status, int page, int limit);
 
     List<MarketCoupon> list(int page, int limit);
-
-    List<MarketCoupon> list(int limit);
-
-    List<MarketCoupon> listAll();
 }
