@@ -5,7 +5,7 @@ server:
 
 spring:
   profiles:
-    active: dev
+    active: aliyun
   main:
     allow-circular-references: true
   data:
