@@ -48,19 +48,25 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         interceptorRegistry.addInterceptor(globalThreadLocalContextRemoveInterceptor)
                 .addPathPatterns("/**");
 
+        // must login
         interceptorRegistry.addInterceptor(fullAuthJwtTokenInterceptor)
                 .addPathPatterns("/user/**")
                 .addPathPatterns("/footprint/**")
                 .addPathPatterns("/cart/**").excludePathPatterns("/cart/goodscount/**")
                 .addPathPatterns("/order/**")
-                .addPathPatterns("/address/**");
+                .addPathPatterns("/address/**")
+                .addPathPatterns("/coupon/**").excludePathPatterns("/coupon/list/**");
 
+        // may login
         interceptorRegistry.addInterceptor(harfAuthJwtTokenInterceptor)
                 .addPathPatterns("/cart/goodscount/**")
                 .addPathPatterns("/goods/detail/**")
-                .addPathPatterns("/home/index/**");
+                .addPathPatterns("/home/index/**")
+                .addPathPatterns("/coupon/list/**");
 
-
+        // after login
+        interceptorRegistry.addInterceptor(AuthLoginInterceptor)
+                        .addPathPatterns("/auth/login/**");
 //                // 3rd party api
 //                .excludePathPatterns("/v3/api-docs/**")// api-docs
 //                .excludePathPatterns("/swagger-ui/**")// swagger-ui
@@ -73,8 +79,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 //                // auth api
 //                .excludePathPatterns("/auth/register/**")
 //                .excludePathPatterns("/auth/login/**");
-        interceptorRegistry.addInterceptor(AuthLoginInterceptor)
-                        .addPathPatterns("/auth/login/**");
+
         log.info("拦截器 注册完成。");
     }
 

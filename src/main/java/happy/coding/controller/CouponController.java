@@ -13,12 +13,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -83,5 +81,23 @@ public class CouponController {
 
         List<MarketCoupon> mylist = couponService.mylist(status, page, limit);
         return BaseRespVo.successPage(mylist);
+    }
+
+    @PostMapping("/receive")
+    @Operation(
+            summary = "用户优惠券领取接口", description = "领取用户优惠券。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo receive(@RequestBody Map<String, Integer> mapParam) {
+
+        Integer couponId = mapParam.get("couponId");
+
+        couponService.receive(couponId);
+        return BaseRespVo.success();
     }
 }
