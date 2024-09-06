@@ -3,8 +3,11 @@ package happy.coding.service.impl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import happy.coding.bean.model.*;
+import happy.coding.bean.vo.param.CollectAddordeleteParam;
+import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.PageInfoContext;
 import happy.coding.context.UserInfoContext;
+import happy.coding.exception.QueryException;
 import happy.coding.mapper.MarketCollectMapper;
 import happy.coding.mapper.MarketGoodsMapper;
 import happy.coding.mapper.MarketTopicMapper;
@@ -13,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -91,6 +95,33 @@ public class CollectServiceImpl implements CollectService {
                 return marketTopicList;
             default:
                 return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public void addordelete(CollectAddordeleteParam collectAddordeleteParam) {
+
+        MarketCollectExample marketCollectExample = new MarketCollectExample();
+        marketCollectExample.createCriteria()
+                .andUserIdEqualTo(UserInfoContext.getUserId())
+                .andTypeEqualTo(collectAddordeleteParam.getType())
+                .andValueIdEqualTo(collectAddordeleteParam.getValueId());
+        List<MarketCollect> marketCollectList = marketCollectMapper.selectByExample(marketCollectExample);
+        if (marketCollectList == null || marketCollectList.isEmpty()) {
+            Date now = new Date();
+            MarketCollect marketCollect = new MarketCollect();
+            marketCollect.setUserId(UserInfoContext.getUserId());
+            marketCollect.setValueId(collectAddordeleteParam.getValueId());
+            marketCollect.setType(collectAddordeleteParam.getType());
+            marketCollect.setAddTime(now);
+            marketCollect.setUpdateTime(now);
+            marketCollect.setDeleted(false);
+            marketCollectMapper.insertSelective(marketCollect);
+        } else {
+            MarketCollect marketCollect = marketCollectList.get(0);
+            marketCollect.setDeleted(!marketCollect.getDeleted());
+            marketCollect.setUpdateTime(new Date());
+            marketCollectMapper.updateByPrimaryKey(marketCollect);
         }
     }
 }

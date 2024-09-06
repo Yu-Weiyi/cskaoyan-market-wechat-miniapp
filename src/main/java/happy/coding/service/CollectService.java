@@ -1,5 +1,7 @@
 package happy.coding.service;
 
+import happy.coding.bean.vo.param.CollectAddordeleteParam;
+
 import java.util.List;
 
 /**
@@ -18,4 +20,6 @@ public interface CollectService {
     boolean hasCollectedTopic(int topicId);
 
     List<? extends Object> list(byte type, int page, int limit);
+
+    void addordelete(CollectAddordeleteParam collectAddordeleteParam);
 }
