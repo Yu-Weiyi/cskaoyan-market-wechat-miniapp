@@ -15,4 +15,5 @@ import lombok.NoArgsConstructor;
 public class OssPutResult {
     PutObjectResult result;
     String url;
+    String key;
 }

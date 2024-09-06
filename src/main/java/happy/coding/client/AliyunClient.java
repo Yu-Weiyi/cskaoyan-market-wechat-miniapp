@@ -116,7 +116,7 @@ public class AliyunClient implements ApplicationContextAware {
             }
         }
         String accessUrl = urlPrefix + "/" + objectName;
-        return new OssPutResult(putObjectResult, accessUrl);
+        return new OssPutResult(putObjectResult, accessUrl, objectName);
     }
     ApplicationContext applicationContext;
     @Override
