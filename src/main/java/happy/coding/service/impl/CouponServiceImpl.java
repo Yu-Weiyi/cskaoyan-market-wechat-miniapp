@@ -5,8 +5,10 @@ import happy.coding.bean.model.*;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.UserInfoContext;
 import happy.coding.exception.QueryException;
+import happy.coding.mapper.MarketCartMapper;
 import happy.coding.mapper.MarketCouponMapper;
 import happy.coding.mapper.MarketCouponUserMapper;
+import happy.coding.mapper.MarketGoodsMapper;
 import happy.coding.service.CouponService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -28,9 +31,13 @@ import java.util.List;
 public class CouponServiceImpl implements CouponService {
 
     @Autowired
-    MarketCouponMapper marketCouponMapper;
+    private MarketCouponMapper marketCouponMapper;
     @Autowired
-    MarketCouponUserMapper marketCouponUserMapper;
+    private MarketCouponUserMapper marketCouponUserMapper;
+    @Autowired
+    private MarketCartMapper marketCartMapper;
+    @Autowired
+    private MarketGoodsMapper marketGoodsMapper;
 
     @Override
     public List<MarketCoupon> listUserAvailable(int page, int limit) {
@@ -221,5 +228,55 @@ public class CouponServiceImpl implements CouponService {
         marketCouponUser.setUpdateTime(now);
         marketCouponUser.setDeleted(false);
         marketCouponUserMapper.insertSelective(marketCouponUser);
+    }
+
+    @Override
+    public List<MarketCoupon> selectlist(int cartId) {
+
+        MarketCart marketCart = marketCartMapper.selectByPrimaryKey(cartId);
+        if (marketCart == null) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+        MarketGoods marketGoods = marketGoodsMapper.selectByPrimaryKey(marketCart.getGoodsId());
+
+
+        Date now = new Date();
+        MarketCouponUserExample marketCouponUserExample = new MarketCouponUserExample();
+        marketCouponUserExample.createCriteria()
+                .andUserIdEqualTo(UserInfoContext.getUserId())
+                .andStatusEqualTo((short) 0)
+                .andDeletedEqualTo(false);
+        List<MarketCouponUser> marketCouponUserList = marketCouponUserMapper.selectByExample(marketCouponUserExample);
+        List<MarketCoupon> marketCouponList = marketCouponUserList.stream()
+                .map(item -> item.getCouponId())
+                .distinct()
+                .map(item -> marketCouponMapper.selectByPrimaryKey(item))
+                .filter(item -> item.getType().equals((short)0))
+                .filter(item -> {
+                    switch (item.getGoodsType()) {
+                        case 0:
+                            return true;
+                        case 1:
+                            return item.getGoodsValue().contains(marketGoods.getCategoryId().toString());
+                        case 2:
+                            return item.getGoodsValue().contains(marketGoods.getId().toString());
+                        default:
+                            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+                    }
+                })
+                .filter(item -> {
+                    switch (item.getTimeType()) {
+                        case 0:
+                            return true;// FIXME hard
+                        case 1:
+                            return now.after(item.getStartTime()) && now.before(item.getEndTime());
+                        default:
+                            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+                    }
+                })
+                .filter(item -> !item.getDeleted())
+                .toList();
+
+        return marketCouponList;
     }
 }

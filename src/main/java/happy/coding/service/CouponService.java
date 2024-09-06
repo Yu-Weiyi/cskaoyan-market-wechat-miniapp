@@ -26,4 +26,6 @@ public interface CouponService {
     void receive(int couponId);
 
     void exchange(String code);
+
+    List<MarketCoupon> selectlist(int cartId);
 }

@@ -118,4 +118,20 @@ public class CouponController {
         couponService.exchange(code);
         return BaseRespVo.success();
     }
+
+    @GetMapping("/selectlist")
+    @Operation(
+            summary = "当前购物车优惠券列表接口", description = "当前购物车优惠券列表。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo selectlist(@RequestParam Integer cartId, /*useless*/@RequestParam Integer grouponRulesId) {
+
+        List<MarketCoupon> selectlist = couponService.selectlist(cartId);
+        return BaseRespVo.successPage(selectlist);
+    }
 }
