@@ -2,27 +2,26 @@ package happy.coding.service.impl;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import happy.coding.bean.model.MarketOrder;
-import happy.coding.bean.model.MarketOrderExample;
-import happy.coding.bean.model.MarketOrderGoods;
-import happy.coding.bean.model.MarketOrderGoodsExample;
-import happy.coding.bean.vo.data.HandleOptionData;
-import happy.coding.bean.vo.data.OrderDetailData;
-import happy.coding.bean.vo.data.OrderListData;
+import happy.coding.bean.model.*;
+import happy.coding.bean.vo.data.*;
+import happy.coding.bean.vo.param.OrderSubmitParam;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.constant.OrderStatusConstant;
 import happy.coding.context.PageInfoContext;
 import happy.coding.context.UserInfoContext;
 import happy.coding.exception.QueryException;
 import happy.coding.exception.StatusException;
-import happy.coding.mapper.MarketOrderGoodsMapper;
-import happy.coding.mapper.MarketOrderMapper;
+import happy.coding.mapper.*;
+import happy.coding.service.AddressService;
+import happy.coding.service.FreightService;
 import happy.coding.service.GroupService;
 import happy.coding.service.OrderService;
+import happy.coding.util.SonwFlakeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,6 +45,22 @@ public class OrderServiceImpl implements OrderService {
     private GroupService groupService;
     @Autowired
     private MarketOrderGoodsMapper marketOrderGoodsMapper;
+    @Autowired
+    private MarketAddressMapper marketAddressMapper;
+    @Autowired
+    private AddressService addressService;
+    @Autowired
+    private MarketCartMapper marketCartMapper;
+    @Autowired
+    private MarketGoodsProductMapper marketGoodsProductMapper;
+    @Autowired
+    private MarketCouponMapper marketCouponMapper;
+    @Autowired
+    private MarketCouponUserMapper marketCouponUserMapper;
+    @Autowired
+    private FreightService freightService;
+
+    private SonwFlakeUtil sonwFlakeUtil;
 
     @Override
     public long countByStatus(short status) {
@@ -230,6 +245,124 @@ public class OrderServiceImpl implements OrderService {
         update.setDeleted(true);
         update.setUpdateTime(new Date());
         marketOrderMapper.updateByPrimaryKeySelective(update);
+    }
+
+    @Override
+    public OrderSubmitData submit(OrderSubmitParam orderSubmitParam) {
+
+        Date now = new Date();
+        MarketAddress marketAddress = marketAddressMapper.selectByPrimaryKey(orderSubmitParam.getAddressId());
+
+        if (marketAddress == null) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+
+        MarketOrder marketOrder = new MarketOrder();
+        marketOrder.setUserId(UserInfoContext.getUserId());
+        marketOrder.setOrderSn(sonwFlakeUtil.getUniqueId());
+        marketOrder.setAftersaleStatus((short) 0);
+        marketOrder.setConsignee(marketAddress.getName());
+        marketOrder.setMobile(marketAddress.getTel());
+        marketOrder.setAddress(addressService.getFullAddress(marketAddress));
+        marketOrder.setMessage(orderSubmitParam.getMessage());
+
+        // useless
+        marketOrder.setGrouponPrice(BigDecimal.ZERO);
+        marketOrder.setIntegralPrice(BigDecimal.ZERO);
+
+        BigDecimal goodsTotalPrice = BigDecimal.ZERO;
+        if (orderSubmitParam.getCartId() == 0) {// select all checked
+            MarketCartExample marketCartExample = new MarketCartExample();
+            marketCartExample.createCriteria()
+                    .andUserIdEqualTo(UserInfoContext.getUserId())
+                    .andCheckedEqualTo(true)
+                    .andDeletedEqualTo(false);
+            List<MarketCart> marketCartList = marketCartMapper.selectByExample(marketCartExample);
+            List<MarketGoodsProduct> marketGoodsProductList = marketCartList.stream()
+                    .map(MarketCart::getProductId)
+                    .map(item -> marketGoodsProductMapper.selectByPrimaryKey(item))
+                    .filter(item -> item != null)
+                    .toList();
+
+            goodsTotalPrice = marketGoodsProductList.stream()
+                    .map(MarketGoodsProduct::getPrice)
+                    .reduce(BigDecimal::add)
+                    .orElse(BigDecimal.ZERO);
+        } else {// fastadd select one goods
+            MarketCart marketCart = marketCartMapper.selectByPrimaryKey(orderSubmitParam.getCartId());
+            MarketGoodsProduct marketGoodsProduct = marketGoodsProductMapper.selectByPrimaryKey(marketCart.getProductId());
+            goodsTotalPrice = marketGoodsProduct.getPrice();
+        }
+        marketOrder.setGoodsPrice(goodsTotalPrice);
+
+        BigDecimal couponPrice = BigDecimal.ZERO;
+        if (orderSubmitParam.getCouponId() != null && orderSubmitParam.getCouponId() > 0) {
+            MarketCoupon marketCoupon = marketCouponMapper.selectByPrimaryKey(orderSubmitParam.getCouponId());
+            if (goodsTotalPrice.compareTo(marketCoupon.getMin()) < 0) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            if (marketCoupon.getStatus() != 0) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            // too complex
+//            switch (marketCoupon.getGoodsType()) {
+//            }
+            switch (marketCoupon.getTimeType()) {
+                case 0:
+                    // too complex
+                    break;
+                case 1:
+                    if (now.before(marketCoupon.getStartTime()) || now.after(marketCoupon.getEndTime())) {
+                        throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+                    }
+                    break;
+                default:
+                    throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+            }
+            if (marketCoupon.getDeleted()) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+
+            MarketCouponUser marketCouponUser = marketCouponUserMapper.selectByPrimaryKey(orderSubmitParam.getUserCouponId());
+            if (!UserInfoContext.getUserId().equals(marketCouponUser.getUserId())) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            if (!marketCouponUser.getCouponId().equals(marketCoupon.getId())) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            if (marketCouponUser.getStatus() != 0 || marketCouponUser.getUsedTime() != null) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            if (now.before(marketCouponUser.getStartTime()) || now.after(marketCouponUser.getEndTime())) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            if (marketCouponUser.getDeleted()) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+
+            // coupon check pass
+            couponPrice = marketCoupon.getDiscount();
+        }
+        marketOrder.setCouponPrice(couponPrice);
+
+        BigDecimal freightPrice = freightService.calc(goodsTotalPrice);
+        marketOrder.setFreightPrice(freightPrice);
+
+        BigDecimal orderTotalPrice = goodsTotalPrice.add(couponPrice.negate()).add(freightPrice);
+        marketOrder.setOrderPrice(orderTotalPrice);
+
+        BigDecimal integralPrice = BigDecimal.ZERO.negate();
+        marketOrder.setActualPrice(orderTotalPrice.add(integralPrice));
+
+        marketOrder.setOrderStatus((short) 101);
+        marketOrder.setAddTime(now);
+        marketOrder.setUpdateTime(now);
+        marketOrder.setDeleted(false);
+
+        marketOrderMapper.insertSelective(marketOrder);
+
+        OrderSubmitData orderSubmitData = new OrderSubmitData(0, marketOrder.getId());
+        return orderSubmitData;
     }
 
     private void update(Integer orderId, List<OrderStatusConstant> conditionalStatusList, OrderStatusConstant newStatus) {

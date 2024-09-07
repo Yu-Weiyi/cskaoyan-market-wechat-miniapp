@@ -75,7 +75,7 @@ public class CartServiceImpl implements CartService {
         Map<String, Object> cartTotal = new HashMap<>();
         cartTotal.put("goodsCount", calcGoodsCount(cartList));
         cartTotal.put("GoodsAmount", calcGoodsAmount(cartList));
-        List<MarketCart> checkedCartList = cartList.stream().filter(item -> item.getChecked()).toList();
+        List<MarketCart> checkedCartList = cartList.stream().filter(item -> item.getChecked()).distinct().toList();
         cartTotal.put("checkedGoodsCount", calcGoodsCount(checkedCartList));
         cartTotal.put("checkedGoodsAmount", calcGoodsAmount(checkedCartList));
 

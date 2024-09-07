@@ -23,4 +23,8 @@ public interface AddressService {
     MarketAddress detail(Integer addressId);
 
     void delete(Integer addressId);
+
+    String getFullAddress(Integer addressId);
+
+    String getFullAddress(MarketAddress marketAddress);
 }

@@ -4,6 +4,8 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.vo.BaseRespVo;
 import happy.coding.bean.vo.data.OrderListData;
+import happy.coding.bean.vo.data.OrderSubmitData;
+import happy.coding.bean.vo.param.OrderSubmitParam;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.PageInfoContext;
 import happy.coding.exception.ParamException;
@@ -157,4 +159,21 @@ public class OrderController {
         orderService.delete(mapParam.get("orderId"));
         return BaseRespVo.success();
     }
+
+    @PostMapping("/submit")
+    @Operation(
+            summary = "订单提交接口", description = "用户提交订单记录。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo submit(@RequestBody OrderSubmitParam orderSubmitParam) {
+
+        OrderSubmitData submit = orderService.submit(orderSubmitParam);
+        return BaseRespVo.success(submit);
+    }
 }
+

@@ -4,7 +4,9 @@ import com.github.pagehelper.PageHelper;
 import happy.coding.bean.model.MarketAddress;
 import happy.coding.bean.model.MarketAddressExample;
 import happy.coding.bean.vo.param.AddressSaveParam;
+import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.UserInfoContext;
+import happy.coding.exception.QueryException;
 import happy.coding.mapper.MarketAddressMapper;
 import happy.coding.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,5 +101,27 @@ public class AddressServiceImpl implements AddressService {
                 .andIdEqualTo(addressId)
                 .andUserIdEqualTo(UserInfoContext.getUserId());
         marketAddressMapper.updateByExampleSelective(record, marketAddressExample);
+    }
+
+    @Override
+    public String getFullAddress(Integer addressId) {
+
+        MarketAddress marketAddress = marketAddressMapper.selectByPrimaryKey(addressId);
+        String fullAddress = getFullAddress(marketAddress);
+        return fullAddress;
+    }
+
+    @Override
+    public String getFullAddress(MarketAddress marketAddress) {
+
+        if (marketAddress == null) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+
+        return marketAddress.getProvince() +
+                marketAddress.getCity() +
+                marketAddress.getCounty() +
+                " " +
+                marketAddress.getAddressDetail();
     }
 }
