@@ -56,7 +56,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .addPathPatterns("/order/**")
                 .addPathPatterns("/address/**")
                 .addPathPatterns("/coupon/**").excludePathPatterns("/coupon/list/**")
-                .addPathPatterns("/collect/**");
+                .addPathPatterns("/collect/**")
+                .addPathPatterns("/feedback/**");
 
         // may login
         interceptorRegistry.addInterceptor(harfAuthJwtTokenInterceptor)
