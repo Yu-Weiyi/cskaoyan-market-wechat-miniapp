@@ -4,6 +4,7 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.model.MarketComment;
 import happy.coding.bean.vo.BaseRespVo;
+import happy.coding.bean.vo.param.CommentPostParam;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.exception.ParamException;
 import happy.coding.service.CommentService;
@@ -12,10 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -82,5 +80,21 @@ public class CommentController {
 
         Map<String, Long> count = commentService.count(valueId, type);
         return BaseRespVo.success(count);
+    }
+
+    @PostMapping("/post")
+    @Operation(
+            summary = "评论发表接口", description = "发表评论。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo post(@RequestBody CommentPostParam commentPostParam) {
+
+        MarketComment post = commentService.post(commentPostParam);
+        return BaseRespVo.success(post);
     }
 }

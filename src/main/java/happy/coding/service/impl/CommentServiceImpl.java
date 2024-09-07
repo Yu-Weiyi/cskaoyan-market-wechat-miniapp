@@ -3,11 +3,14 @@ package happy.coding.service.impl;
 import com.github.pagehelper.PageHelper;
 import happy.coding.bean.model.MarketComment;
 import happy.coding.bean.model.MarketCommentExample;
+import happy.coding.bean.vo.param.CommentPostParam;
+import happy.coding.context.UserInfoContext;
 import happy.coding.mapper.MarketCommentMapper;
 import happy.coding.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -63,5 +66,25 @@ public class CommentServiceImpl implements CommentService {
         long hasPicCount = marketCommentMapper.countByExample(marketCommentExample1);
 
         return Map.of("allCount", allCount, "hasPicCount", hasPicCount);
+    }
+
+    @Override
+    public MarketComment post(CommentPostParam commentPostParam) {
+
+        Date now = new Date();
+        MarketComment marketComment = new MarketComment();
+        marketComment.setValueId(commentPostParam.getValueId());
+        marketComment.setType(commentPostParam.getType());
+        marketComment.setContent(commentPostParam.getContent());
+        marketComment.setUserId(UserInfoContext.getUserId());
+        marketComment.setHasPicture(commentPostParam.getHasPicture());
+        marketComment.setPicUrls(commentPostParam.getPicUrls());
+        marketComment.setStar(commentPostParam.getStar());
+        marketComment.setAddTime(now);
+        marketComment.setUpdateTime(now);
+        marketComment.setDeleted(false);
+        marketCommentMapper.insertSelective(marketComment);
+
+        return marketComment;
     }
 }
