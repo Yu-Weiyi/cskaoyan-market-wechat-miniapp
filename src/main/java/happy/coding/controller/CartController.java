@@ -3,6 +3,7 @@ package happy.coding.controller;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.vo.BaseRespVo;
+import happy.coding.bean.vo.data.CartCheckoutData;
 import happy.coding.bean.vo.param.CartAddParam;
 import happy.coding.bean.vo.param.CartCheckedParam;
 import happy.coding.bean.vo.param.CartFastaddParam;
@@ -170,4 +171,20 @@ public class CartController {
         int cartId = cartService.fastadd(cartFastaddParam);
         return BaseRespVo.success(cartId);
     }
+
+    @GetMapping("/checkout")
+    @Operation(
+            summary = "购物车检出接口", description = "检出当前购物车信息。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    public BaseRespVo checkout(@RequestParam Integer cartId, @RequestParam Integer addressId, @RequestParam Integer couponId, @RequestParam Integer userCouponId) {
+
+        CartCheckoutData checkout = cartService.checkout(cartId, addressId, couponId, userCouponId);
+        return BaseRespVo.success(checkout);
+    }
 }
+

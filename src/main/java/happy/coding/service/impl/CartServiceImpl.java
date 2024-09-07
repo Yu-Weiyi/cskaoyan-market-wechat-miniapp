@@ -1,25 +1,25 @@
 package happy.coding.service.impl;
 
 import happy.coding.bean.model.*;
+import happy.coding.bean.vo.data.CartCheckoutData;
 import happy.coding.bean.vo.param.CartAddParam;
 import happy.coding.bean.vo.param.CartCheckedParam;
 import happy.coding.bean.vo.param.CartFastaddParam;
 import happy.coding.bean.vo.param.CartUpdateParam;
+import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.UserInfoContext;
-import happy.coding.mapper.MarketCartMapper;
-import happy.coding.mapper.MarketGoodsMapper;
-import happy.coding.mapper.MarketGoodsProductMapper;
+import happy.coding.exception.QueryException;
+import happy.coding.mapper.*;
 import happy.coding.service.CartService;
+import happy.coding.service.CouponService;
+import happy.coding.service.FreightService;
 import happy.coding.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -41,6 +41,16 @@ public class CartServiceImpl implements CartService {
     private MarketGoodsProductMapper marketGoodsProductMapper;
     @Autowired
     private GoodsService goodsService;
+    @Autowired
+    private MarketAddressMapper marketAddressMapper;
+    @Autowired
+    private FreightService freightService;
+    @Autowired
+    private MarketCouponMapper marketCouponMapper;
+    @Autowired
+    private MarketCouponUserMapper marketCouponUserMapper;
+    @Autowired
+    private CouponService couponService;
 
     @Override
     public long goodscount() {
@@ -186,6 +196,110 @@ public class CartServiceImpl implements CartService {
         marketCart.setDeleted(false);
         marketCartMapper.insertSelective(marketCart);
         return marketCart.getId();
+    }
+
+    @Override
+    public CartCheckoutData checkout(Integer cartId, Integer addressId, Integer couponId, Integer userCouponId) {
+
+        Date now = new Date();
+        CartCheckoutData cartCheckoutData = new CartCheckoutData();
+        cartCheckoutData.setCartId(cartId);
+        cartCheckoutData.setAddressId(addressId);
+        cartCheckoutData.setCouponId(couponId);
+        cartCheckoutData.setUserCouponId(userCouponId);
+        cartCheckoutData.setCheckedAddress(marketAddressMapper.selectByPrimaryKey(addressId));
+
+        cartCheckoutData.setGrouponPrice(BigDecimal.ZERO);// useless
+
+        BigDecimal goodsTotalPrice = BigDecimal.ZERO;
+        if (cartId == 0) {// select all checked
+            MarketCartExample marketCartExample = new MarketCartExample();
+            marketCartExample.createCriteria()
+                    .andUserIdEqualTo(UserInfoContext.getUserId())
+                    .andCheckedEqualTo(true)
+                    .andDeletedEqualTo(false);
+            List<MarketCart> marketCartList = marketCartMapper.selectByExample(marketCartExample);
+            cartCheckoutData.setCheckedGoodsList(marketCartList);
+            List<MarketGoodsProduct> marketGoodsProductList = marketCartList.stream()
+                    .map(MarketCart::getProductId)
+                    .map(item -> marketGoodsProductMapper.selectByPrimaryKey(item))
+                    .filter(item -> item != null)
+                    .toList();
+
+            goodsTotalPrice = marketGoodsProductList.stream()
+                    .map(MarketGoodsProduct::getPrice)
+                    .reduce(BigDecimal::add)
+                    .orElse(BigDecimal.ZERO);
+        } else {// fastadd select one goods
+            MarketCart marketCart = marketCartMapper.selectByPrimaryKey(cartId);
+            cartCheckoutData.setCheckedGoodsList(List.of(marketCart));
+            MarketGoodsProduct marketGoodsProduct = marketGoodsProductMapper.selectByPrimaryKey(marketCart.getProductId());
+            goodsTotalPrice = marketGoodsProduct.getPrice();
+        }
+        cartCheckoutData.setGoodsTotalPrice(goodsTotalPrice);
+
+        BigDecimal couponPrice = BigDecimal.ZERO;
+        if (couponId != null && couponId > 0) {
+            MarketCoupon marketCoupon = marketCouponMapper.selectByPrimaryKey(couponId);
+            if (goodsTotalPrice.compareTo(marketCoupon.getMin()) < 0) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            if (marketCoupon.getStatus() != 0) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            // too complex
+//            switch (marketCoupon.getGoodsType()) {
+//            }
+            switch (marketCoupon.getTimeType()) {
+                case 0:
+                    // too complex
+                    break;
+                case 1:
+                    if (now.before(marketCoupon.getStartTime()) || now.after(marketCoupon.getEndTime())) {
+                        throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+                    }
+                    break;
+                default:
+                    throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+            }
+            if (marketCoupon.getDeleted()) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+
+            MarketCouponUser marketCouponUser = marketCouponUserMapper.selectByPrimaryKey(userCouponId);
+            if (!UserInfoContext.getUserId().equals(marketCouponUser.getUserId())) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            if (!marketCouponUser.getCouponId().equals(marketCoupon.getId())) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            if (marketCouponUser.getStatus() != 0 || marketCouponUser.getUsedTime() != null) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            if (now.before(marketCouponUser.getStartTime()) || now.after(marketCouponUser.getEndTime())) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+            if (marketCouponUser.getDeleted()) {
+                throw new QueryException(ErrorCodeConstant.INVALID_PARAM);
+            }
+
+            // coupon check pass
+            couponPrice = marketCoupon.getDiscount();
+        }
+        cartCheckoutData.setCouponPrice(couponPrice);
+
+        BigDecimal freightPrice = freightService.calc(goodsTotalPrice);
+        cartCheckoutData.setFreightPrice(freightPrice);
+
+        BigDecimal orderTotalPrice = goodsTotalPrice.add(couponPrice.negate()).add(freightPrice);
+        cartCheckoutData.setOrderTotalPrice(orderTotalPrice);
+
+        BigDecimal integralPrice = BigDecimal.ZERO.negate();
+        cartCheckoutData.setActualPrice(orderTotalPrice.add(integralPrice));
+
+        cartCheckoutData.setAvailableCouponLength(couponService.listUserAvailable(1, 0).size());
+
+        return cartCheckoutData;
     }
 
     private List<MarketCart> listAll() {

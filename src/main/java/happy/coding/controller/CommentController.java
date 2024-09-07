@@ -52,7 +52,7 @@ public class CommentController {
 
         if (valueId == null || valueId <= 0 ||
                 type == null || type != 0 && type != 1 ||
-                showType == null || !List.of((byte)0, (byte)1, (byte)2, (byte)3, (byte)4).contains(showType) ||// FIXME what is that mean?
+                showType == null || !List.of((byte)0, (byte)1, (byte)2, (byte)3, (byte)4).contains(showType) ||
                 page == null || page <= 0 ||
                 limit == null || limit <= 0
         ) {

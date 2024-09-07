@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -233,13 +234,6 @@ public class CouponServiceImpl implements CouponService {
     @Override
     public List<MarketCoupon> selectlist(int cartId) {
 
-        MarketCart marketCart = marketCartMapper.selectByPrimaryKey(cartId);
-        if (marketCart == null) {
-            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
-        }
-        MarketGoods marketGoods = marketGoodsMapper.selectByPrimaryKey(marketCart.getGoodsId());
-
-
         Date now = new Date();
         MarketCouponUserExample marketCouponUserExample = new MarketCouponUserExample();
         marketCouponUserExample.createCriteria()
@@ -247,36 +241,50 @@ public class CouponServiceImpl implements CouponService {
                 .andStatusEqualTo((short) 0)
                 .andDeletedEqualTo(false);
         List<MarketCouponUser> marketCouponUserList = marketCouponUserMapper.selectByExample(marketCouponUserExample);
+
         List<MarketCoupon> marketCouponList = marketCouponUserList.stream()
                 .map(item -> item.getCouponId())
                 .distinct()
                 .map(item -> marketCouponMapper.selectByPrimaryKey(item))
                 .filter(item -> item.getType().equals((short)0))
-                .filter(item -> {
-                    switch (item.getGoodsType()) {
-                        case 0:
-                            return true;
-                        case 1:
-                            return item.getGoodsValue().contains(marketGoods.getCategoryId().toString());
-                        case 2:
-                            return item.getGoodsValue().contains(marketGoods.getId().toString());
-                        default:
-                            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
-                    }
-                })
-                .filter(item -> {
-                    switch (item.getTimeType()) {
-                        case 0:
-                            return true;// FIXME hard
-                        case 1:
-                            return now.after(item.getStartTime()) && now.before(item.getEndTime());
-                        default:
-                            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
-                    }
-                })
-                .filter(item -> !item.getDeleted())
                 .toList();
 
-        return marketCouponList;
+        if (cartId != 0) {
+            MarketCart marketCart = marketCartMapper.selectByPrimaryKey(cartId);
+            if (marketCart == null) {
+                throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+            }
+            MarketGoods marketGoods = marketGoodsMapper.selectByPrimaryKey(marketCart.getGoodsId());
+
+            List<MarketCoupon> filteredMarketCouponList = marketCouponList.stream()
+                    .filter(item -> {
+                        switch (item.getGoodsType()) {
+                            case 0:
+                                return true;
+                            case 1:
+                                return Arrays.stream(item.getGoodsValue()).toList().contains(marketGoods.getCategoryId().toString());
+                            case 2:
+                                return Arrays.stream(item.getGoodsValue()).toList().contains(marketGoods.getId().toString());
+                            default:
+                                throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+                        }
+                    })
+                    .filter(item -> {
+                        switch (item.getTimeType()) {
+                            case 0:
+                                return true;// FIXME too complex
+                            case 1:
+                                return now.after(item.getStartTime()) && now.before(item.getEndTime());
+                            default:
+                                throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+                        }
+                    })
+                    .filter(item -> !item.getDeleted())
+                    .toList();
+            return filteredMarketCouponList;
+        } else {
+            // FIXME too complex
+            return marketCouponList;
+        }
     }
 }

@@ -83,7 +83,7 @@ public class MarketCoupon implements Serializable {
     * 商品限制值，goods_type如果是0则空集合，如果是1则是类目集合，如果是2则是商品集合。
     */
     @Schema(description="商品限制值，goods_type如果是0则空集合，如果是1则是类目集合，如果是2则是商品集合。")
-    private String goodsValue;
+    private String[] goodsValue;
 
     /**
     * 优惠券兑换码

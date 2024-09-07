@@ -1,5 +1,6 @@
 package happy.coding.service;
 
+import happy.coding.bean.vo.data.CartCheckoutData;
 import happy.coding.bean.vo.param.CartAddParam;
 import happy.coding.bean.vo.param.CartCheckedParam;
 import happy.coding.bean.vo.param.CartFastaddParam;
@@ -32,4 +33,6 @@ public interface CartService {
     Map<String, Object> delete(List<Integer> productIds);
 
     int fastadd(CartFastaddParam cartFastaddParam);
+
+    CartCheckoutData checkout(Integer cartId, Integer addressId, Integer couponId, Integer userCouponId);
 }
