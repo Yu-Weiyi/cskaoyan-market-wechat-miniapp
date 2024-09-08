@@ -56,6 +56,8 @@ public class GoodsServiceImpl implements GoodsService {
     private CollectService collectService;
     @Autowired
     private FootprintService footprintService;
+    @Autowired
+    private SearchService searchService;
 
     @Override
     public List<MarketGoods> listNew(int limit) {
@@ -256,6 +258,48 @@ public class GoodsServiceImpl implements GoodsService {
                 .andDeletedEqualTo(false);
         PageHelper.startPage(1, 10);
         List<MarketGoods> marketGoodsList = marketGoodsMapper.selectByExample(marketGoodsExample);
+        return marketGoodsList;
+    }
+
+    @Override
+    public List<String> helper(String keyword) {
+
+        MarketGoodsExample marketGoodsExample = new MarketGoodsExample();
+        marketGoodsExample.createCriteria()
+                .andKeywordsLike("%" + keyword + "%")
+                .andDeletedEqualTo(false);
+        marketGoodsExample.setOrderByClause("add_time DESC");
+        List<MarketGoods> marketGoodsList = marketGoodsMapper.selectByExample(marketGoodsExample);
+        return marketGoodsList.stream()
+                .map(MarketGoods::getKeywords)
+                .toList();
+    }
+
+    @Override
+    public List<MarketGoods> search(String keyword, String sort, String order, int page, int limit) {
+
+        // search
+        MarketGoodsExample marketGoodsExample = new MarketGoodsExample();
+        marketGoodsExample.createCriteria()
+                .andNameLike("%" + keyword + "%")
+                .andDeletedEqualTo(false);
+        marketGoodsExample.or()
+                .andKeywordsLike("%" + keyword + "%")
+                .andDeletedEqualTo(false);
+        marketGoodsExample.or()
+                .andBriefLike("%" + keyword + "%")
+                .andDeletedEqualTo(false);
+        marketGoodsExample.setOrderByClause(sort + " " + order);
+        if (page > 0 && limit > 0) {
+            PageHelper.startPage(page, limit);
+        }
+        List<MarketGoods> marketGoodsList = marketGoodsMapper.selectByExample(marketGoodsExample);
+
+        // record search history
+        if (UserInfoContext.isLogined()) {
+            searchService.addHistory(keyword);
+        }
+
         return marketGoodsList;
     }
 

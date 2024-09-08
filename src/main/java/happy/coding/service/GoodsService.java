@@ -33,4 +33,8 @@ public interface GoodsService {
     List<MarketGoodsSpecification> selectSpecificationByGoodsId(int goodsId);
 
     List<MarketGoods> related(int goodsId);
+
+    List<String> helper(String keyword);
+
+    List<MarketGoods> search(String keyword, String sort, String order, int page, int limit);
 }
