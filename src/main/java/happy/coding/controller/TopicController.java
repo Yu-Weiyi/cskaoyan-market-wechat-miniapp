@@ -4,6 +4,7 @@ import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.model.MarketTopic;
 import happy.coding.bean.vo.BaseRespVo;
+import happy.coding.bean.vo.data.TopicDetailData;
 import happy.coding.service.TopicService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,8 +41,7 @@ public class TopicController {
     @Operation(
             summary = "专题列表接口", description = "查询专题列表。",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "正常返回"),
-                    @ApiResponse(responseCode = "401", description = "认证失败")
+                    @ApiResponse(responseCode = "200", description = "正常返回")
             }
     )
     @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
@@ -49,5 +49,33 @@ public class TopicController {
 
         List<MarketTopic> marketTopicList = topicService.list(page, limit);
         return BaseRespVo.successPage(marketTopicList);
+    }
+
+    @GetMapping("/detail")
+    @Operation(
+            summary = "专题详情接口", description = "查询专题详情。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo detail(@RequestParam Integer id) {
+
+        TopicDetailData detail = topicService.detail(id);
+        return BaseRespVo.success(detail);
+    }
+
+    @GetMapping("/related")
+    @Operation(
+            summary = "专题详情接口", description = "查询专题详情。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo related(@RequestParam Integer id) {
+
+        List<MarketTopic> related = topicService.related(id);
+        return BaseRespVo.successPage(related);
     }
 }

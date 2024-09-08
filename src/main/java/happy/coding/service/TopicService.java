@@ -1,6 +1,7 @@
 package happy.coding.service;
 
 import happy.coding.bean.model.MarketTopic;
+import happy.coding.bean.vo.data.TopicDetailData;
 
 import java.util.List;
 
@@ -16,4 +17,8 @@ import java.util.List;
 public interface TopicService {
 
     List<MarketTopic> list(int page, int limit);
+
+    TopicDetailData detail(int topicId);
+
+    List<MarketTopic> related(int topicId);
 }
