@@ -63,12 +63,12 @@ public class OrderServiceImpl implements OrderService {
     private SonwFlakeUtil sonwFlakeUtil;
 
     @Override
-    public long countByStatus(short status) {
+    public long countByStatus(List<Short> statusList) {
 
         MarketOrderExample marketOrderExample = new MarketOrderExample();
         marketOrderExample.createCriteria()
                 .andUserIdEqualTo(UserInfoContext.getUserId())
-                .andOrderStatusEqualTo(status)
+                .andOrderStatusIn(statusList)
                 .andDeletedEqualTo(false);
         long num = marketOrderMapper.countByExample(marketOrderExample);
         return num;
@@ -77,26 +77,29 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public long countUnpaid() {
 
-        return countByStatus((short) 101);
+        return countByStatus(List.of(OrderStatusConstant.UNPAID.getOrderStatus()));
 
     }
 
     @Override
     public long countUnShip() {
 
-        return countByStatus((short) 201);
+        return countByStatus(List.of(OrderStatusConstant.PAID.getOrderStatus()));
     }
 
     @Override
     public long countUnrecv() {
 
-        return countByStatus((short) 101);
+        return countByStatus(List.of(OrderStatusConstant.SHIPPED.getOrderStatus()));
     }
 
     @Override
     public long countUnComment() {
 
-        return countByStatus((short) 101);
+        return countByStatus(List.of(
+                OrderStatusConstant.USER_RECEIVED.getOrderStatus(),
+                OrderStatusConstant.SYSTEM_RECEIVED.getOrderStatus()
+        ));
     }
 
     @Override

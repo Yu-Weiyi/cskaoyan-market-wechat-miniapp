@@ -29,4 +29,4 @@
 - @RequestParam required，会HTTP400，应捕捉异常。
 - 手机号格式校验
 - 优惠券过期检查
-- user/index 与 order/list 不一致
+- 未付款 redis限时 

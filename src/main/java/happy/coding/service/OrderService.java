@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public interface OrderService {
 
-    long countByStatus(short status);
+    long countByStatus(List<Short> statusList);
 
     long countUnpaid();
 
