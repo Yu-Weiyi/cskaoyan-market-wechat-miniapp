@@ -26,14 +26,14 @@ public class TopicServiceImpl implements TopicService {
     MarketTopicMapper marketTopicMapper;
 
     @Override
-    public List<MarketTopic> list(int limit) {
+    public List<MarketTopic> list(int page, int limit) {
 
         MarketTopicExample marketTopicExample = new MarketTopicExample();
         marketTopicExample.createCriteria()
                 .andDeletedEqualTo(false);
         marketTopicExample.setOrderByClause("add_time DESC");
-        if (limit > 0) {
-            PageHelper.startPage(1, limit);
+        if (page > 0 && limit > 0) {
+            PageHelper.startPage(page, limit);
         }
         List<MarketTopic> marketTopicList = marketTopicMapper.selectByExample(marketTopicExample);
         return marketTopicList;

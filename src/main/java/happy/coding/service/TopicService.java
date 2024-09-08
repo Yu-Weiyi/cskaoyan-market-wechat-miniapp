@@ -15,5 +15,5 @@ import java.util.List;
  */
 public interface TopicService {
 
-    List<MarketTopic> list(int limit);
+    List<MarketTopic> list(int page, int limit);
 }

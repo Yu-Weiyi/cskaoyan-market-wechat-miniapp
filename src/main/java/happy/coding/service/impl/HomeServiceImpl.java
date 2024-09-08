@@ -88,7 +88,7 @@ public class HomeServiceImpl implements HomeService {
             if (value == null) {
                 throw new SystemException(ErrorCodeConstant.SYSTEM_GLOBAL_PARAM_ERROR);
             }
-            List<MarketTopic> marketTopicList = topicService.list(Integer.parseInt(value));
+            List<MarketTopic> marketTopicList = topicService.list(1, Integer.parseInt(value));
             return marketTopicList;
         });
         FutureTask<List> floorGoodsListTask = new FutureTask<>(
