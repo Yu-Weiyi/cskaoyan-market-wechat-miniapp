@@ -32,6 +32,7 @@ public enum ErrorCodeConstant {
     QUERY_FAILED(10, "查询失败"),
     SYSTEM_GLOBAL_PARAM_ERROR(11, "系统全局参数错误"),
     ORDER_STATUS_ERROR(12, "订单状态错误"),
+    CAPTCHA_SEND_TOO_OFFEN(13, "短信验证码发送太频繁"),
 
     PLEASE_LOGIN(501, "请登录");
 

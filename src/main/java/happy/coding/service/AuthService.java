@@ -1,6 +1,7 @@
 package happy.coding.service;
 
 import happy.coding.bean.vo.data.AuthLoginData;
+import happy.coding.bean.vo.param.AuthRegisterParam;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -13,25 +14,13 @@ import happy.coding.bean.vo.data.AuthLoginData;
  */
 public interface AuthService {
 
-    /**
-     * @name login
-     * @description 登录。
-     * @param username java.lang.String
-     * @param password java.lang.String
-     * @return AuthLoginData
-     * @author WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
-     * @since 2024-09-02, Mon, 19:14, CST
-     */
+    void regCaptcha(String mobile);
+
+    AuthLoginData register(AuthRegisterParam authRegisterParam);
+
     AuthLoginData login(String username, String password);
 
     void authenticate(String jwtToken);
 
-    /**
-     * @name logout
-     * @description 登出。
-     * @return void
-     * @author WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
-     * @since 2024-09-02, Mon, 21:02, CST
-     */
     void logout();
 }

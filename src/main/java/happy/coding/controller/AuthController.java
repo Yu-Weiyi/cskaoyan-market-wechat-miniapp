@@ -5,6 +5,9 @@ import com.github.xiaoymin.knife4j.annotations.ApiSupport;
 import happy.coding.bean.vo.BaseRespVo;
 import happy.coding.bean.vo.data.AuthLoginData;
 import happy.coding.bean.vo.param.AuthLoginParam;
+import happy.coding.bean.vo.param.AuthRegisterParam;
+import happy.coding.constant.ErrorCodeConstant;
+import happy.coding.exception.ParamException;
 import happy.coding.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -12,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -32,10 +37,37 @@ public class AuthController {
     @Autowired
     AuthService authService;
 
-    // TODO 注册
-    public BaseRespVo register() {
+    @PostMapping("/regCaptcha")
+    @Operation(
+            summary = "短信验证码接口", description = "短信发放验证码。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo regCaptcha(@RequestBody Map<String, String> mapParam) {
 
-        return null;
+        if (mapParam == null || mapParam.get("mobile") == null) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+        String mobile = mapParam.get("mobile");
+
+        authService.regCaptcha(mobile);
+        return BaseRespVo.success();
+    }
+
+    @PostMapping("/register")
+    @Operation(
+            summary = "注册接口", description = "注册用户账户。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo register(@RequestBody AuthRegisterParam authRegisterParam) {
+
+        AuthLoginData register = authService.register(authRegisterParam);
+        return BaseRespVo.success(register);
     }
 
     @PostMapping("/login")

@@ -2,19 +2,21 @@ package happy.coding.service.impl;
 
 import happy.coding.bean.model.MarketUser;
 import happy.coding.bean.model.MarketUserExample;
+import happy.coding.bean.vo.SmsSendResult;
 import happy.coding.bean.vo.data.AuthLoginData;
+import happy.coding.bean.vo.param.AuthRegisterParam;
+import happy.coding.client.AliyunClient;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.UserInfoContext;
 import happy.coding.exception.AuthException;
 import happy.coding.exception.ParamException;
 import happy.coding.mapper.MarketUserMapper;
 import happy.coding.service.AuthService;
+import happy.coding.service.RedisService;
 import happy.coding.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -37,13 +39,65 @@ import java.util.concurrent.TimeUnit;
 public class AuthServiceImpl implements AuthService {
 
     @Autowired
-    MarketUserMapper marketUserMapper;
-
+    private MarketUserMapper marketUserMapper;
     @Autowired
-    RedisTemplate redisTemplate;
-
+    private RedisService redisService;
     @Autowired
-    JwtUtil jwtUtil;
+    private JwtUtil jwtUtil;
+    @Autowired
+    private AliyunClient aliyunClient;
+
+    @Override
+    public void regCaptcha(String mobile) {
+
+        // avoid sending too often
+        long ttl = redisService.ttlCaptcha(mobile);
+        if (ttl > 240) {// 240 s = 4 min
+            throw new AuthException(ErrorCodeConstant.CAPTCHA_SEND_TOO_OFFEN);
+        }
+
+        // send
+        SmsSendResult smsSendResult = aliyunClient.sendValidationCode(mobile);
+        String code = smsSendResult.getCode();
+
+        redisService.setCaptcha(mobile, code, 5, TimeUnit.MINUTES);// 5 min
+    }
+
+    @Override
+    public AuthLoginData register(AuthRegisterParam authRegisterParam) {
+
+        MarketUserExample marketUserExample = new MarketUserExample();
+        marketUserExample.createCriteria()
+                .andUsernameEqualTo(authRegisterParam.getUsername());
+        marketUserExample.or()
+                .andMobileEqualTo(authRegisterParam.getMobile());
+        List<MarketUser> marketUserList = marketUserMapper.selectByExample(marketUserExample);
+        if (marketUserList != null && marketUserList.size() > 0) {
+            throw new AuthException(ErrorCodeConstant.QUERY_FAILED);
+        }
+
+        if (!authRegisterParam.getCode().equals(redisService.getCaptcha(authRegisterParam.getMobile()))) {
+            throw new AuthException(ErrorCodeConstant.QUERY_FAILED);
+        }
+        redisService.delCaptcha(authRegisterParam.getMobile());
+
+        Date now = new Date();
+        MarketUser marketUser = new MarketUser();
+        marketUser.setUsername(authRegisterParam.getUsername());
+        marketUser.setPassword(BCrypt.hashpw(authRegisterParam.getPassword(), BCrypt.gensalt()));
+        marketUser.setGender((byte) 0);
+        marketUser.setMobile(authRegisterParam.getMobile());
+        marketUser.setAddTime(now);
+        marketUser.setUpdateTime(now);
+        marketUser.setUserLevel((byte) 0);
+        marketUser.setNickname(authRegisterParam.getUsername());
+        marketUser.setStatus((byte) 0);
+        marketUser.setDeleted(false);
+        marketUserMapper.insertSelective(marketUser);
+
+        AuthLoginData login = login(authRegisterParam.getUsername(), authRegisterParam.getPassword());
+        return login;
+    }
 
     /**
      * @param username java.lang.String
@@ -91,7 +145,7 @@ public class AuthServiceImpl implements AuthService {
         String jwt = jwtUtil.genToken(id, now);
 
         // redis store jwt
-        redisTemplate.opsForValue().set(id, jwt, jwtUtil.getExpirationTime(), TimeUnit.SECONDS);
+        redisService.setJwt(id, jwt, jwtUtil.getExpirationTime(), TimeUnit.SECONDS);
 
         Map<String, String> userInfo = new HashMap<>();
         userInfo.put("nickName", marketUser.getNickname());
@@ -105,7 +159,7 @@ public class AuthServiceImpl implements AuthService {
         log.debug("校验 JWT(" + jwtToken + ")");
         Integer userId = Integer.valueOf(jwtUtil.extractId(jwtToken));
 
-        String storedJwtToken = (String) redisTemplate.opsForValue().get(userId.toString());
+        String storedJwtToken = redisService.getJwt(userId.toString());
         if (storedJwtToken == null) {
             throw new AuthException(ErrorCodeConstant.TOKEN_EXPIRED);
         }
@@ -129,6 +183,6 @@ public class AuthServiceImpl implements AuthService {
 
         Integer userId = UserInfoContext.getUserId();
         // redis delete jwt
-        redisTemplate.delete(userId.toString());
+        redisService.delJwt(userId.toString());
     }
 }
