@@ -65,7 +65,7 @@ public class MarketOrderGoods implements Serializable {
     * 商品货品的规格列表
     */
     @Schema(description="商品货品的规格列表")
-    private String specifications;
+    private String[] specifications;
 
     /**
     * 商品货品图片或者商品图片

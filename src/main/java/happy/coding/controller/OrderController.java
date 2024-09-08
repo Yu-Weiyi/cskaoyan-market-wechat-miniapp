@@ -2,9 +2,11 @@ package happy.coding.controller;
 
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.github.xiaoymin.knife4j.annotations.ApiSupport;
+import happy.coding.bean.model.MarketOrderGoods;
 import happy.coding.bean.vo.BaseRespVo;
 import happy.coding.bean.vo.data.OrderListData;
 import happy.coding.bean.vo.data.OrderSubmitData;
+import happy.coding.bean.vo.param.OrderCommentParam;
 import happy.coding.bean.vo.param.OrderSubmitParam;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.context.PageInfoContext;
@@ -174,6 +176,59 @@ public class OrderController {
 
         OrderSubmitData submit = orderService.submit(orderSubmitParam);
         return BaseRespVo.success(submit);
+    }
+
+    @GetMapping("/goods")
+    @Operation(
+            summary = "订单评价信息接口", description = "用户准备订单评价。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo goods(@RequestParam Integer orderId, @RequestParam Integer productId) {
+
+        MarketOrderGoods goods = orderService.goods(orderId, productId);
+        return BaseRespVo.success(goods);
+    }
+
+    @PostMapping("/prepay")
+    @Operation(
+            summary = "订单付款接口", description = "用户付款订单。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo prepay(@RequestBody Map<String, Integer> mapParam) {
+
+        if (mapParam == null || mapParam.get("orderId") == null || mapParam.get("orderId") <= 0) {
+            throw new ParamException(ErrorCodeConstant.INVALID_PARAM);
+        }
+
+        Integer orderId = mapParam.get("orderId");
+        orderService.prepay(orderId);
+        return BaseRespVo.success();
+    }
+
+    @PostMapping("/comment")
+    @Operation(
+            summary = "订单评价接口", description = "用户评价订单。",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "正常返回"),
+                    @ApiResponse(responseCode = "200-1", description = "参数错误"),
+                    @ApiResponse(responseCode = "401", description = "认证失败")
+            }
+    )
+    @ApiOperationSupport(author = "于魏祎 yu_weiyi@outlook.com")
+    public BaseRespVo comment(@RequestBody OrderCommentParam orderCommentParam) {
+
+        orderService.comment(orderCommentParam);
+        return BaseRespVo.success();
     }
 }
 

@@ -1,7 +1,9 @@
 package happy.coding.service;
 
+import happy.coding.bean.model.MarketOrderGoods;
 import happy.coding.bean.vo.data.OrderListData;
 import happy.coding.bean.vo.data.OrderSubmitData;
+import happy.coding.bean.vo.param.OrderCommentParam;
 import happy.coding.bean.vo.param.OrderSubmitParam;
 
 import java.util.List;
@@ -41,4 +43,10 @@ public interface OrderService {
     void delete(Integer orderId);
 
     OrderSubmitData submit(OrderSubmitParam orderSubmitParam);
+
+    MarketOrderGoods goods(int orderId, int productId);
+
+    void prepay(int orderId);
+
+    void comment(OrderCommentParam orderCommentParam);
 }

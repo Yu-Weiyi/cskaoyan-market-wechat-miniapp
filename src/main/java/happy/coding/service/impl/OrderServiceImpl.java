@@ -4,6 +4,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import happy.coding.bean.model.*;
 import happy.coding.bean.vo.data.*;
+import happy.coding.bean.vo.param.CommentPostParam;
+import happy.coding.bean.vo.param.OrderCommentParam;
 import happy.coding.bean.vo.param.OrderSubmitParam;
 import happy.coding.constant.ErrorCodeConstant;
 import happy.coding.constant.OrderStatusConstant;
@@ -12,20 +14,14 @@ import happy.coding.context.UserInfoContext;
 import happy.coding.exception.QueryException;
 import happy.coding.exception.StatusException;
 import happy.coding.mapper.*;
-import happy.coding.service.AddressService;
-import happy.coding.service.FreightService;
-import happy.coding.service.GroupService;
-import happy.coding.service.OrderService;
+import happy.coding.service.*;
 import happy.coding.util.SonwFlakeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author 为伊WaYease <a href="mailto:yu_weiyi@outlook.com">yu_weiyi@outlook.com</a>
@@ -59,6 +55,8 @@ public class OrderServiceImpl implements OrderService {
     private MarketCouponUserMapper marketCouponUserMapper;
     @Autowired
     private FreightService freightService;
+    @Autowired
+    private CommentService commentService;
 
     private SonwFlakeUtil sonwFlakeUtil;
 
@@ -260,6 +258,7 @@ public class OrderServiceImpl implements OrderService {
             throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
         }
 
+        // insert MarketOrder
         MarketOrder marketOrder = new MarketOrder();
         marketOrder.setUserId(UserInfoContext.getUserId());
         marketOrder.setOrderSn(sonwFlakeUtil.getUniqueId());
@@ -273,6 +272,8 @@ public class OrderServiceImpl implements OrderService {
         marketOrder.setGrouponPrice(BigDecimal.ZERO);
         marketOrder.setIntegralPrice(BigDecimal.ZERO);
 
+        List<MarketGoodsProduct> productList;
+        List<MarketCart> cartList;
         BigDecimal goodsTotalPrice = BigDecimal.ZERO;
         if (orderSubmitParam.getCartId() == 0) {// select all checked
             MarketCartExample marketCartExample = new MarketCartExample();
@@ -281,19 +282,22 @@ public class OrderServiceImpl implements OrderService {
                     .andCheckedEqualTo(true)
                     .andDeletedEqualTo(false);
             List<MarketCart> marketCartList = marketCartMapper.selectByExample(marketCartExample);
+            cartList = marketCartList;
             List<MarketGoodsProduct> marketGoodsProductList = marketCartList.stream()
                     .map(MarketCart::getProductId)
                     .map(item -> marketGoodsProductMapper.selectByPrimaryKey(item))
                     .filter(item -> item != null)
                     .toList();
-
+            productList = marketGoodsProductList;
             goodsTotalPrice = marketGoodsProductList.stream()
                     .map(MarketGoodsProduct::getPrice)
                     .reduce(BigDecimal::add)
                     .orElse(BigDecimal.ZERO);
         } else {// fastadd select one goods
             MarketCart marketCart = marketCartMapper.selectByPrimaryKey(orderSubmitParam.getCartId());
+            cartList = List.of(marketCart);
             MarketGoodsProduct marketGoodsProduct = marketGoodsProductMapper.selectByPrimaryKey(marketCart.getProductId());
+            productList = List.of(marketGoodsProduct);
             goodsTotalPrice = marketGoodsProduct.getPrice();
         }
         marketOrder.setGoodsPrice(goodsTotalPrice);
@@ -364,8 +368,74 @@ public class OrderServiceImpl implements OrderService {
 
         marketOrderMapper.insertSelective(marketOrder);
 
+        // insert MarketOrderGoods
+        cartList.forEach(item -> {
+            MarketOrderGoods marketOrderGoods = new MarketOrderGoods();
+            marketOrderGoods.setOrderId(marketOrder.getId());
+            marketOrderGoods.setGoodsId(item.getGoodsId());
+            marketOrderGoods.setGoodsName(item.getGoodsName());
+            marketOrderGoods.setGoodsSn(item.getGoodsSn());
+            marketOrderGoods.setProductId(item.getProductId());
+            marketOrderGoods.setNumber(item.getNumber());
+            marketOrderGoods.setPrice(item.getPrice());
+            marketOrderGoods.setSpecifications(item.getSpecifications());
+            marketOrderGoods.setPicUrl(item.getPicUrl());
+            marketOrderGoods.setComment(0);
+            marketOrderGoods.setAddTime(now);
+            marketOrderGoods.setUpdateTime(now);
+            marketOrderGoods.setDeleted(false);
+            marketOrderGoodsMapper.insertSelective(marketOrderGoods);
+        });
+
+        // delete cart
+        cartList.forEach(item -> {
+            MarketCart marketCart = new MarketCart();
+            marketCart.setId(item.getId());
+            marketCart.setDeleted(true);
+            marketCartMapper.updateByPrimaryKeySelective(marketCart);
+        });
+
         OrderSubmitData orderSubmitData = new OrderSubmitData(0, marketOrder.getId());
         return orderSubmitData;
+    }
+
+    @Override
+    public MarketOrderGoods goods(int orderId, int productId) {
+
+        MarketOrderGoodsExample marketOrderGoodsExample = new MarketOrderGoodsExample();
+        marketOrderGoodsExample.createCriteria()
+                .andOrderIdEqualTo(orderId)
+                .andProductIdEqualTo(productId)
+                .andCommentEqualTo(0)
+                .andDeletedEqualTo(false);
+        List<MarketOrderGoods> marketOrderGoodsList = marketOrderGoodsMapper.selectByExample(marketOrderGoodsExample);
+        if (marketOrderGoodsList == null || marketOrderGoodsList.size() == 0) {
+            throw new QueryException(ErrorCodeConstant.QUERY_FAILED);
+        }
+        return marketOrderGoodsList.get(0);
+    }
+
+    @Override
+    public void prepay(int orderId) {
+
+        update(orderId, Arrays.asList(OrderStatusConstant.UNPAID), OrderStatusConstant.PAID);
+    }
+
+    @Override
+    public void comment(OrderCommentParam orderCommentParam) {
+
+        MarketComment marketComment = commentService.post(new CommentPostParam(
+                (byte) 0,
+                orderCommentParam.getOrderGoodsId(),
+                orderCommentParam.getContent(),
+                orderCommentParam.getHasPicture(),
+                orderCommentParam.getPicUrls(),
+                orderCommentParam.getStar()
+        ));
+        MarketOrderGoods marketOrderGoods = new MarketOrderGoods();
+        marketOrderGoods.setId(orderCommentParam.getOrderGoodsId());
+        marketOrderGoods.setComment(marketComment.getId());
+        marketOrderGoodsMapper.updateByPrimaryKeySelective(marketOrderGoods);
     }
 
     private void update(Integer orderId, List<OrderStatusConstant> conditionalStatusList, OrderStatusConstant newStatus) {
